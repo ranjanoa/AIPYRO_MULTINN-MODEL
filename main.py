@@ -374,6 +374,14 @@ def automated_control_loop():
                         ai_rec = None
                         if mbrl_manager and current_mode in (1, 3):
                              ai_rec = mbrl_manager.get_optimal_action(real_df)
+                             
+                             # [PIRL-MPC] Intercept and correct AI actions via First-Principles Physics
+                             try:
+                                 from modules.pirl_mpc import engine as pirl_engine
+                                 if ai_rec:
+                                     ai_rec = pirl_engine.evaluate_and_correct(ai_rec, mapped_state)
+                             except Exception as _pe:
+                                 logger.warning(f"PIRL MPC Error (Continuing with raw AI): {_pe}")
                         
                         ai_score = float(ai_rec.get('confidence', 0)) if ai_rec and ai_rec.get('confidence') is not None else 0
 
