@@ -23,8 +23,8 @@ LITERATURE_DEFAULTS = {
     'cp_clinker': 0.25, 'cp_gas': 0.26,
     'heat_of_calcination': 445.0, 'heat_of_clinkerization': -100.0,
     'combustion_efficiency': 0.98, 'radiation_loss_factor': 0.08,
-    'fan_draft_to_air_mass': 0.15, 'base_kiln_pressure': 0.0,
-    'draft_suction_factor': 0.025, 'gas_expansion_factor': 0.8,
+    'fan_draft_to_air_mass': 0.15, 'base_kiln_pressure': -1.5,
+    'draft_suction_factor': 0.012, 'gas_expansion_factor': 0.001,
     'gas_velocity_factor': 0.05, 'mill_resistance_penalty': 0.25,
     'clinker_melt_point': 1380.0, 'liquid_phase_multiplier': 0.015,
     'base_torque_factor': 5.72, 'base_co_ppm': 50.0, 'rdf_co_factor': 15.0,
@@ -61,13 +61,15 @@ class FirstPrinciplesDigitalTwin:
         target_draft = action_vector.get('draft', state.get('draft', 0.0))
         speed_rpm = action_vector.get('speed', state.get('speed', 1.0))
         
-        if 'pc_fuel' in action_vector or 'kiln_fuel' in action_vector:
-            target_pc_fuel = action_vector.get('pc_fuel', state.get('pc_fuel', 0.0))
-            target_kiln_fuel = action_vector.get('kiln_fuel', state.get('kiln_fuel', 0.0))
-        else:
+        target_pc_fuel = action_vector.get('pc_fuel', state.get('pc_fuel', 0.0))
+        target_kiln_fuel = action_vector.get('kiln_fuel', state.get('kiln_fuel', 0.0))
+        
+        # If specific fuel targets are near zero, fall back to total generic fuel to prevent physics collapse
+        if target_pc_fuel < 0.1 and target_kiln_fuel < 0.1:
             total_fuel = action_vector.get('fuel', state.get('fuel', 0.0))
-            target_pc_fuel = total_fuel * 0.60
-            target_kiln_fuel = total_fuel * 0.40
+            if total_fuel > 0.1:
+                target_pc_fuel = total_fuel * 0.60
+                target_kiln_fuel = total_fuel * 0.40
 
         coal_mill_on = float(state.get('coal_mill_on', 1.0))
         sec_air_temp = float(state.get('sec_air_temp', 25.0)) 
@@ -221,16 +223,16 @@ class PIRL_MPC_Controller:
                 fn_lower = friendly_name.lower()
                 if 'feed' in fn_lower: mapping[friendly_name] = 'feed'
                 elif 'rdf' in fn_lower or 'tyre' in fn_lower or 'alternative' in fn_lower or 'af' in fn_lower: mapping[friendly_name] = 'rdf'
-                elif 'pc_fuel' in fn_lower or 'calciner_fuel' in fn_lower: mapping[friendly_name] = 'pc_fuel'
-                elif 'kiln_fuel' in fn_lower or 'main_burner' in fn_lower: mapping[friendly_name] = 'kiln_fuel'
+                elif 'mill' in fn_lower and ('status' in fn_lower or 'run' in fn_lower or 'on' in fn_lower): mapping[friendly_name] = 'coal_mill_on'
+                elif ('pc' in fn_lower or 'calciner' in fn_lower) and ('fuel' in fn_lower or 'petcoke' in fn_lower or 'coal' in fn_lower): mapping[friendly_name] = 'pc_fuel'
+                elif ('kiln' in fn_lower or 'main_burner' in fn_lower) and ('fuel' in fn_lower or 'petcoke' in fn_lower or 'coal' in fn_lower): mapping[friendly_name] = 'kiln_fuel'
                 elif 'fuel' in fn_lower or 'petcoke' in fn_lower or 'coal' in fn_lower: mapping[friendly_name] = 'fuel'
-                elif 'draft' in fn_lower or 'fan' in fn_lower or 'id_fan' in fn_lower: mapping[friendly_name] = 'draft'
-                elif 'speed' in fn_lower or 'rpm' in fn_lower: mapping[friendly_name] = 'speed'
+                elif 'id fan' in fn_lower or 'id_fan' in fn_lower: mapping[friendly_name] = 'draft'
+                elif 'kiln speed' in fn_lower: mapping[friendly_name] = 'speed'
                 elif 'bzt' in fn_lower or 'burning' in fn_lower: mapping[friendly_name] = 'bzt'
-                elif 'torque' in fn_lower or 'amps' in fn_lower or 'kw' in fn_lower: mapping[friendly_name] = 'torque'
+                elif 'torque' in fn_lower or ('kiln' in fn_lower and ('amps' in fn_lower or 'kw' in fn_lower)): mapping[friendly_name] = 'torque'
                 elif 'pressure' in fn_lower or 'hood' in fn_lower or 'inlet' in fn_lower: mapping[friendly_name] = 'pressure'
                 elif 'exhaust' in fn_lower or 'preheater' in fn_lower or 'egt' in fn_lower: mapping[friendly_name] = 'exhaust_temp'
-                elif 'mill' in fn_lower and ('status' in fn_lower or 'run' in fn_lower or 'on' in fn_lower): mapping[friendly_name] = 'coal_mill_on'
                 elif 'co' in fn_lower and 'ppm' in fn_lower: mapping[friendly_name] = 'co_ppm'
                 elif 'secondary' in fn_lower and 'temp' in fn_lower: mapping[friendly_name] = 'sec_air_temp'
                 
@@ -317,14 +319,24 @@ class PIRL_MPC_Controller:
                 correction_factor = twin.params['correction_factor']
                 
                 for act in corrected_rec['actions']:
-                    curr = act['current_setpoint']
-                    tgt = act['final_target']
+                    curr = float(act.get('current_setpoint', 0.0))
+                    tgt = float(act.get('final_target', 0.0))
                     diff = tgt - curr
-                    safe_tgt = curr + (diff * correction_factor)
+                    
+                    is_fuel = any(k in act['var_name'].lower() for k in ['petcoke', 'fuel', 'rdf'])
+                    
+                    if is_fuel and tgt <= 0.001:
+                        safe_tgt = curr
+                        act['reason'] = "MPC Blocked (Unsafe Zero Target)"
+                    elif 'Thermal Collapse' in rollout['violations'][0] and is_fuel and tgt < curr:
+                        safe_tgt = curr
+                        act['reason'] = "MPC Blocked (Thermal Collapse)"
+                    else:
+                        safe_tgt = curr + (diff * correction_factor)
+                        act['reason'] = f"MPC Corrected ({rollout['violations'][0]})"
                     
                     act['final_target'] = safe_tgt
                     act['fingerprint_set_point'] = safe_tgt
-                    act['reason'] = f"MPC Corrected ({rollout['violations'][0]})"
                     
                 corrected_rec['mpc_intervened'] = True
                 corrected_rec['mpc_reason'] = rollout['violations'][0]
