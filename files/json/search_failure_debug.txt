@@ -2371,3 +2371,73 @@ Rejected at tag: Petcoke (Kiln)
 Current RT value: 6.2726
 Target range: [5.3317 to 5.0000]
 Config Limits: [0.0 to 5.0]
+
+--- 2026-04-28T22:44:17.255070 ---
+Phase: Standard
+Rejected at tag: Petcoke (Kiln)
+Current RT value: 6.4892
+Target range: [5.5158 to 5.0000]
+Config Limits: [0.0 to 5.0]
+
+--- 2026-04-28T22:44:29.757401 ---
+Phase: Standard
+Rejected at tag: Petcoke (Kiln)
+Current RT value: 6.5000
+Target range: [5.5250 to 5.0000]
+Config Limits: [0.0 to 5.0]
+
+--- 2026-04-28T22:44:30.453492 ---
+Phase: Steering (Relaxed)
+Rejected at tag: RDF (Kiln)
+Current RT value: 0.0000
+Target range: [0.0000 to 0.0000]
+Config Limits: [0.0 to 5.0]
+
+--- 2026-04-28T22:44:44.169459 ---
+Phase: Standard
+Rejected at tag: Petcoke (Kiln)
+Current RT value: 6.4946
+Target range: [5.5204 to 5.0000]
+Config Limits: [0.0 to 5.0]
+
+--- 2026-04-28T22:44:44.881783 ---
+Phase: Steering (Relaxed)
+Rejected at tag: RDF (Kiln)
+Current RT value: 0.0000
+Target range: [0.0000 to 0.0000]
+Config Limits: [0.0 to 5.0]
+
+--- 2026-04-28T22:44:54.787828 ---
+Phase: Standard
+Rejected at tag: Petcoke (Kiln)
+Current RT value: 6.5423
+Target range: [5.5609 to 5.0000]
+Config Limits: [0.0 to 5.0]
+
+--- 2026-04-28T22:44:55.496871 ---
+Phase: Steering (Relaxed)
+Rejected at tag: RDF (Kiln)
+Current RT value: 0.0000
+Target range: [0.0000 to 0.0000]
+Config Limits: [0.0 to 5.0]
+
+--- 2026-04-28T22:45:12.830187 ---
+Phase: Standard
+Rejected at tag: Petcoke (Kiln)
+Current RT value: 6.5970
+Target range: [5.6075 to 5.0000]
+Config Limits: [0.0 to 5.0]
+
+--- 2026-04-28T22:45:29.351822 ---
+Phase: Standard
+Rejected at tag: Quench fan gas flow
+Current RT value: 486.2157
+Target range: [413.2833 to 559.1480]
+Config Limits: [0.0 to 914.9]
+
+--- 2026-04-28T22:46:12.358074 ---
+Phase: Standard
+Rejected at tag: Petcoke (Kiln)
+Current RT value: 6.6945
+Target range: [5.6903 to 5.0000]
+Config Limits: [0.0 to 5.0]

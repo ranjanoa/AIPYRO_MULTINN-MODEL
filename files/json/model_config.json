@@ -1709,7 +1709,8 @@
       "Petcoke (PC)",
       "RDF (Kiln)",
       "RDF 1 (PC)",
-      "RDF 2 (PC)"
+      "RDF 2 (PC)",
+      "Coal Mill (ON/OFF)"
     ],
     "main_optimization_tag": "Kiln feed",
     "min_max_constraint_tags": [
@@ -1721,7 +1722,7 @@
     ],
     "stability_lookahead": 30,
     "stability_tags": [],
-    "std_search_tolerance": 0.15,
+    "std_search_tolerance": 0.25,
     "strict_filter_priority": 1,
     "strict_search_tolerance": 0.15
   },
