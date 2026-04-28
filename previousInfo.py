@@ -48,16 +48,25 @@ def store_previous():
         # Parse Setpoints for Database
         setpoints_dict = {}
         for action in actions:
-            # Handle both naming conventions
             var_name = action.get('var_name')
-            val = action.get('fingerprint_set_point')
+
+            # CRITICAL: Always write the NUDGED value to InfluxDB, not the raw target.
+            # nudge_target = safe incremental step toward the goal.
+            # fingerprint_set_point = the absolute final target (too large to write directly).
+            val = action.get('nudge_target')
+            source = 'nudge_target'
+            if val is None:
+                val = action.get('fingerprint_set_point')
+                source = 'fingerprint_set_point'
             if val is None:
                 val = action.get('setpoint')
+                source = 'setpoint'
 
-            # Ensure valid float
             if var_name and val is not None:
                 try:
-                    setpoints_dict[var_name] = float(val)
+                    fval = float(val)
+                    setpoints_dict[var_name] = fval
+                    print(f"  [MANUAL-WRITE] {var_name}: {source}={fval} | nudge={action.get('nudge_target')} | target={action.get('fingerprint_set_point')}", flush=True)
                 except ValueError:
                     continue
 

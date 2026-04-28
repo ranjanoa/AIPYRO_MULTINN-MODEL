@@ -347,45 +347,28 @@ def generate_calculated_actions(raw_actions, state_map, controls_cfg, indicators
 
 def finalize_setpoints_for_db(recommendation, current_state, config):
     """
-    Centralized point-of-entry for the Industrial Nudge.
-    Ensures that regardless of which engine (AI/FP) proposed the target, 
-    the value written to InfluxDB is ALWAYS the safely nudged one.
+    Centralized point-of-entry for writing setpoints to InfluxDB.
+    Uses the engine's pre-computed nudge_target directly.
+    The engine (FP or NN) computes nudge_target using the correct live data (real_df).
+    We do NOT recompute here to avoid stale/wrong current_state issues.
     """
-    controls_cfg = config.get('control_variables', {})
-    nudge_cfg = config.get('nudge_settings', {})
-    default_gain = nudge_cfg.get('step_fraction', 0.15)
-    
     setpoints = {}
     actions = recommendation.get('actions', [])
-    
+
     for act in actions:
         name = act.get('var_name')
         if not name: continue
-        
-        # 1. Start with the Final Goal from the Engine
-        # We prefer 'fingerprint_set_point' or 'final_target' as the master goal
-        target = float(act.get('fingerprint_set_point') or act.get('final_target') or 0.0)
-        curr = float(current_state.get(name, 0.0) or 0.0)
-        
-        # 2. Get Nudge Config
-        # Nudge ONLY applies to Control Variables. Indicators/Calculated jump 100%.
-        if name in controls_cfg:
-            gain = abs(float(controls_cfg[name].get('nudge_speed', default_gain)))
-            def_min = float(controls_cfg[name].get('default_min', -9999))
-            def_max = float(controls_cfg[name].get('default_max', 9999))
+
+        # Use the engine's pre-computed nudge_target.
+        # This is what the UI shows, and this is what should be written to the DB.
+        nudge_val = act.get('nudge_target')
+        if nudge_val is not None:
+            setpoints[name] = float(nudge_val)
         else:
-            # Indicators/Calc/Misc -> 100% gain (Full Jump)
-            gain = 1.0
-            def_min, def_max = -9999, 9999
-            
-        # 3. Apply the One-and-Only Industrial Nudge formula
-        nudged_val = apply_industrial_nudge(curr, target, gain, def_min, def_max)
-        
-        # 4. Final output assignment
-        setpoints[name] = nudged_val
-        
-        # Update the action object in-place so UI is synced exactly to DB log
-        act['nudge_target'] = round(float(nudged_val), 4)
+            # Fallback: use fingerprint_set_point (raw target) if nudge not available
+            raw = act.get('fingerprint_set_point') or act.get('final_target') or act.get('setpoint')
+            if raw is not None:
+                setpoints[name] = float(raw)
 
     return setpoints
 

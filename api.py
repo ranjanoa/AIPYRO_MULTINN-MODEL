@@ -258,6 +258,9 @@ def find_fingerprint():
 
         # === STANDARD SEARCH LOGIC (Runs for Disengaged/Monitor Mode) ===
         req_data = request.get_json()
+        engine_logger = fingerprint_engine.engine_logger
+        engine_logger.info(f"[API] Search Request received. Constraints: {list(req_data.get('deviation', {}).keys())}")
+        
         prev_time = req_data.get("previous_Time", config.DEFAULT_PREVIOUS_TIME)
         future_time = 60
         end_time = datetime.utcnow()
@@ -295,22 +298,29 @@ def find_fingerprint():
         formatted_results = []
         ts_col = config.TIMESTAMP_COLUMN
         
-        for row_dict in top_matches_raw:
+        for i, row_dict in enumerate(top_matches_raw):
             try:
                 # Reconstruct row from dict for build_api_response compatibility
                 row = pd.Series(row_dict)
                 ts = row.get(ts_col)
                 
                 # Retrieve the 60-minute future window from history for visualization
-                matches = hist_df.index[hist_df[ts_col] == ts].tolist()
-                if not matches: continue
-                idx = matches[0]
+                target_ts = pd.to_datetime(ts)
+                matches = hist_df.index[pd.to_datetime(hist_df[ts_col]) == target_ts].tolist()
                 
-                future_time = 60
-                pred_df = hist_df.iloc[idx: idx + future_time].copy()
-                if len(pred_df) < future_time:
-                    padding = [pred_df.iloc[-1]] * (future_time - len(pred_df))
-                    pred_df = pd.concat([pred_df, pd.DataFrame(padding)])
+                pred_df = None
+                if matches:
+                    idx = matches[0]
+                    future_time = 60
+                    pred_df = hist_df.iloc[idx: idx + future_time].copy()
+                    
+                    if len(pred_df) < future_time:
+                        last_row = pred_df.iloc[-1:]
+                        padding = pd.concat([last_row] * (future_time - len(pred_df)))
+                        pred_df = pd.concat([pred_df, padding])
+                else:
+                    engine_logger.warning(f"  [API] Visualization window not found for {ts}. Using dummy padding.")
+                    pred_df = pd.DataFrame([row_dict] * 60)
 
                 # Calculate physical similarity score (0-100%)
                 sim_pct = fingerprint_engine.calculate_match_percentage(
@@ -320,21 +330,20 @@ def find_fingerprint():
                     indicators_cfg
                 )
 
-                # HONEST FALLBACK: Force score to 0.0 if this was a filled near-miss
-                # (Maintains operator trust by flagging results that failed strict limits)
                 if is_fallback: sim_pct = 0.0
 
                 api_obj = process_model.build_api_response(real_df, row, pred_df, sim_pct, 0, 0)
                 formatted_results.append(api_obj)
             except Exception as e:
-                print(f"Match Formatting Error: {e}")
+                engine_logger.error(f"  [API] Match {i+1} formatting error: {str(e)}")
                 continue
-
-        if not formatted_results:
-            return jsonify({"data": [process_model.build_no_fingerprint_response(current_state)]})
 
         # Final Sort: Ensure the UI shows the highest Similarity % first
         formatted_results.sort(key=lambda x: float(x.get('match_score', 0)), reverse=True)
+
+        if not formatted_results:
+            engine_logger.warning("[API] All matches failed formatting. Returning no-fingerprint response.")
+            return jsonify({"data": [process_model.build_no_fingerprint_response(current_state)]})
 
         return jsonify({"data": formatted_results})
 

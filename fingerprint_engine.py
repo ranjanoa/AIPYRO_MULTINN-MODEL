@@ -132,7 +132,7 @@ def get_active_strategy(conf=None):
     strategies = conf.get('strategies', {})
     if strategy_name and strategy_name in strategies:
         strat = strategies[strategy_name]
-        engine_logger.info(f"[STRATEGY] Active: {strategy_name} — {strat.get('description', '')}")
+        engine_logger.info(f"[STRATEGY] Active: {strategy_name} - {strat.get('description', '')}")
         return strategy_name, strat
     return 'DEFAULT', {}
 
@@ -859,7 +859,7 @@ def find_closest_historical_batches(historical_df, current_state, filter_tags, l
 
 def find_best_fingerprint_advanced(current_real_df_window, historical_df, frontend_strategy, current_state,
                                    weights=None):
-    if historical_df.empty or not frontend_strategy: return [], False
+    if historical_df.empty: return [], False
 
     initial_count = len(historical_df)
 
@@ -907,10 +907,21 @@ def find_best_fingerprint_advanced(current_real_df_window, historical_df, fronte
             engine_logger.info(f"[SEARCH] Strict filtering using {len(core_tags)} variables: {core_tags}")
 
         for tag, strategy in frontend_strategy.items():
-            if tag not in phase_history.columns: continue
+            # NAME RESOLUTION: Match UI friendly name to history column name
+            actual_col = tag
+            if tag not in phase_history.columns:
+                cfg_match = all_vars_cfg.get(tag, {})
+                tag_name = cfg_match.get('tag_name')
+                if tag_name and tag_name in phase_history.columns:
+                    actual_col = tag_name
+                else:
+                    continue
 
-            # Skip filtering if not a core process variable
-            if tag not in core_tags: continue
+            # NEW: If a manual limit (custom_min/max) is provided, ALWAYS respect it.
+            # Otherwise, only prune by core_tags to keep the search efficient.
+            is_manual = any(k in strategy for k in ['custom_min', 'custom_max', 'min', 'max', 'Higher', 'Lower'])
+            if not is_manual and tag not in core_tags:
+                continue
 
             try:
                 # NEW: Skip Priority 0 variables AND calculated variables from filtering phase
@@ -920,9 +931,17 @@ def find_best_fingerprint_advanced(current_real_df_window, historical_df, fronte
                 if prio == 0 or cfg_var.get('is_calculated', False) or 'formula' in cfg_var:
                     continue
 
-                # Robustly extract min/max from strategy config
-                abs_min = float(strategy.get('custom_min', strategy.get('default_min', strategy.get('min', -9e9))))
-                abs_max = float(strategy.get('custom_max', strategy.get('default_max', strategy.get('max', 9e9))))
+                # Robustly extract min/max from strategy config (Handle both 'min' and 'Min')
+                abs_min = float(strategy.get('custom_min', 
+                                strategy.get('default_min', 
+                                strategy.get('min', 
+                                strategy.get('Min', -9e9)))))
+                
+                abs_max = float(strategy.get('custom_max', 
+                                strategy.get('default_max', 
+                                strategy.get('max', 
+                                strategy.get('Max', 9e9)))))
+                
                 cur_val = float(current_state.get(tag, 0))
 
                 # Bug #4 Fix: Apply Absolute Tolerance Bounds
@@ -943,32 +962,37 @@ def find_best_fingerprint_advanced(current_real_df_window, historical_df, fronte
                 eff_max = min(abs_max, tol_max)
 
                 prev_len = len(phase_history)
-                phase_history = phase_history[phase_history[tag].between(eff_min, eff_max)]
+                phase_history = phase_history[phase_history[actual_col].between(eff_min, eff_max)]
                 new_len = len(phase_history)
 
                 if prev_len - new_len > 0:
                     engine_logger.info(
-                        f"[SEARCH] Filter {tag} [{eff_min:.1f}-{eff_max:.1f}]: Removed {prev_len - new_len} rows. Remaining: {new_len}")
+                        f"  [PRUNE] {tag} (col:{actual_col}): {prev_len} -> {new_len} rows (Bounds: {eff_min:.1f} to {eff_max:.1f})")
+                elif new_len == 0:
+                    engine_logger.warning(
+                        f"  [PRUNE] {tag} (col:{actual_col}): ZERO rows remain after applying {eff_min:.1f} to {eff_max:.1f}!")
 
                 if phase_history.empty:
-                    # PERSISTENT FILE LOGGING FOR DEBUGGING
                     try:
-                        with open(
-                                "c:/Users/ranja/projects/CimporDeployment-main10032026/files/json/search_failure_debug.txt",
-                                "a") as df:
+                        debug_path = os.path.join(
+                            os.path.dirname(os.path.abspath(__file__)),
+                            "files", "json", "search_failure_debug.txt"
+                        )
+                        with open(debug_path, "a") as df:
                             df.write(f"\n--- {datetime.now().isoformat()} ---\n")
                             df.write(f"Phase: {phase['name']}\n")
                             df.write(f"Rejected at tag: {tag}\n")
                             df.write(f"Current RT value: {cur_val:.4f}\n")
                             df.write(f"Target range: [{eff_min:.4f} to {eff_max:.4f}]\n")
                             df.write(f"Config Limits: [{abs_min:.1f} to {abs_max:.1f}]\n")
-                    except:
+                    except Exception:
                         pass
 
                     engine_logger.warning(
                         f"[SEARCH] '{phase['name']}' FAILED at tag '{tag}'. Val: {cur_val:.2f}, Target: [{eff_min:.2f} - {eff_max:.2f}]")
                     break
-            except:
+            except (TypeError, ValueError, KeyError) as e:
+                engine_logger.warning(f"[SEARCH] Skipping tag '{tag}' due to error: {e}")
                 continue
 
         if not phase_history.empty:

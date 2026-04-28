@@ -2245,3 +2245,129 @@ Rejected at tag: RDF 2 (PC)
 Current RT value: 7.5215
 Target range: [6.7693 to 8.2736]
 Config Limits: [0.0 to 10.0]
+
+--- 2026-04-28T21:36:23.903171 ---
+Phase: Standard
+Rejected at tag: Coal Mill (ON/OFF)
+Current RT value: 0.0038
+Target range: [0.0032 to 0.0043]
+Config Limits: [0.0 to 1.0]
+
+--- 2026-04-28T21:38:37.221288 ---
+Phase: Standard
+Rejected at tag: Coal Mill (ON/OFF)
+Current RT value: 0.0000
+Target range: [0.0000 to 0.0000]
+Config Limits: [0.0 to 1.0]
+
+--- 2026-04-28T21:40:50.851581 ---
+Phase: Standard
+Rejected at tag: Coal Mill (ON/OFF)
+Current RT value: 0.0000
+Target range: [0.0000 to 0.0000]
+Config Limits: [0.0 to 1.0]
+
+--- 2026-04-28T21:43:03.671878 ---
+Phase: Standard
+Rejected at tag: Coal Mill (ON/OFF)
+Current RT value: 0.0000
+Target range: [0.0000 to 0.0000]
+Config Limits: [0.0 to 1.0]
+
+--- 2026-04-28T21:45:18.498479 ---
+Phase: Standard
+Rejected at tag: RIP (Kiln)
+Current RT value: 1104.3186
+Target range: [938.6708 to 1269.9664]
+Config Limits: [0.0 to 2000.0]
+
+--- 2026-04-28T21:47:32.773382 ---
+Phase: Standard
+Rejected at tag: Coal Mill (ON/OFF)
+Current RT value: 0.0000
+Target range: [0.0000 to 0.0000]
+Config Limits: [0.0 to 1.0]
+
+--- 2026-04-28T21:49:47.544535 ---
+Phase: Standard
+Rejected at tag: Coal Mill (ON/OFF)
+Current RT value: 0.0000
+Target range: [0.0000 to 0.0000]
+Config Limits: [0.0 to 1.0]
+
+--- 2026-04-28T21:51:59.268366 ---
+Phase: Standard
+Rejected at tag: Coal Mill (ON/OFF)
+Current RT value: 0.0000
+Target range: [0.0000 to 0.0000]
+Config Limits: [0.0 to 1.0]
+
+--- 2026-04-28T21:53:30.819628 ---
+Phase: Standard
+Rejected at tag: Coal Mill (ON/OFF)
+Current RT value: 0.0000
+Target range: [0.0000 to 0.0000]
+Config Limits: [0.0 to 1.0]
+
+--- 2026-04-28T21:55:07.283836 ---
+Phase: Standard
+Rejected at tag: Coal Mill (ON/OFF)
+Current RT value: 0.0000
+Target range: [0.0000 to 0.0000]
+Config Limits: [0.0 to 1.0]
+
+--- 2026-04-28T22:03:10.069183 ---
+Phase: Standard
+Rejected at tag: Coal Mill (ON/OFF)
+Current RT value: 0.0000
+Target range: [0.0000 to 0.0000]
+Config Limits: [0.0 to 1.0]
+
+--- 2026-04-28T22:05:39.167608 ---
+Phase: Standard
+Rejected at tag: Coal Mill (ON/OFF)
+Current RT value: 0.0000
+Target range: [0.0000 to 0.0000]
+Config Limits: [0.0 to 1.0]
+
+--- 2026-04-28T22:35:14.829699 ---
+Phase: Standard
+Rejected at tag: RIP (Kiln)
+Current RT value: 1203.6448
+Target range: [1023.0981 to 1384.1916]
+Config Limits: [0.0 to 2000.0]
+
+--- 2026-04-28T22:38:46.338050 ---
+Phase: Standard
+Rejected at tag: Petcoke (Kiln)
+Current RT value: 7.2891
+Target range: [6.1957 to 5.0000]
+Config Limits: [0.0 to 5.0]
+
+--- 2026-04-28T22:38:47.531932 ---
+Phase: Steering (Relaxed)
+Rejected at tag: RIP (Kiln)
+Current RT value: 3.0000
+Target range: [0.0000 to 6.0000]
+Config Limits: [0.0 to 2000.0]
+
+--- 2026-04-28T22:40:03.115936 ---
+Phase: Standard
+Rejected at tag: Petcoke (Kiln)
+Current RT value: 7.3085
+Target range: [6.2122 to 5.0000]
+Config Limits: [0.0 to 5.0]
+
+--- 2026-04-28T22:40:03.934541 ---
+Phase: Steering (Relaxed)
+Rejected at tag: RIP (Kiln)
+Current RT value: 238.8732
+Target range: [0.0000 to 477.7463]
+Config Limits: [0.0 to 2000.0]
+
+--- 2026-04-28T22:42:19.799259 ---
+Phase: Standard
+Rejected at tag: Petcoke (Kiln)
+Current RT value: 6.2726
+Target range: [5.3317 to 5.0000]
+Config Limits: [0.0 to 5.0]

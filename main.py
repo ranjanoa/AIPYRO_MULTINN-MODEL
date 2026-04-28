@@ -428,14 +428,8 @@ def automated_control_loop():
                                     recommendation['active_strategy'] = "FINGERPRINT" 
                                     recommendation['driver'] = "HISTORY-FALLBACK"
                         
-                        # --- ATTACH SCORES AND BROADCAST ---
-                        if recommendation:
-                            # Attach individual scores for the dual-score UI
-                            recommendation['fp_score'] = fp_score
-                            recommendation['ai_score'] = ai_score
-                            recommendation['selected_strategy'] = recommendation.get('active_strategy', 'FINGERPRINT')
-                            
-                            socketio.emit('autopilot_update', recommendation)
+                        # Scores attached — final broadcast happens after nudge finalization below.
+                        # (Removed early emit here to ensure UI always matches what is written to DB)
                         else:
                             logger.warning("[AUTOPILOT] No recommendation available this cycle. Skipping broadcast.")
 
@@ -462,6 +456,12 @@ def automated_control_loop():
                         calc_names = {c['var_name'] for c in calc_actions}
                         recommendation['actions'] = [a for a in recommendation['actions'] if a.get('var_name') not in calc_names]
                         recommendation['actions'].extend(calc_actions)
+
+                        # Attach dual-scores now so they are present on the single final emit
+                        if 'fp_score' not in recommendation:
+                            recommendation['fp_score'] = fp_score if 'fp_score' in dir() else 0
+                            recommendation['ai_score'] = ai_score if 'ai_score' in dir() else 0
+                            recommendation['selected_strategy'] = recommendation.get('active_strategy', 'FINGERPRINT')
 
                         score = recommendation.get('match_score', '0')
                         if score == "SAFETY-CLAMP":
@@ -517,8 +517,17 @@ def automated_control_loop():
                                 
                                 # Find original action to preserve metadata/reasoning if possible
                                 orig = next((a for a in recommendation.get('actions', []) if a['var_name'] == vn), None)
-                                curr = float(mapped_state.get(vn, 0.0) or 0.0)
-                                
+
+                                # Use current_setpoint from the engine action — it used real_df correctly.
+                                # mapped_state can give 0 for variables with key name mismatches.
+                                if orig and orig.get('current_setpoint') is not None:
+                                    try:
+                                        curr = float(orig['current_setpoint'])
+                                    except (ValueError, TypeError):
+                                        curr = float(mapped_state.get(vn, 0.0) or 0.0)
+                                else:
+                                    curr = float(mapped_state.get(vn, 0.0) or 0.0)
+
                                 # Restore unthrottled target metadata for UI parsing
                                 fingerprint_absolute = orig.get('fingerprint_set_point') if orig else val
                                 final_tgt = orig.get('final_target') if orig else fingerprint_absolute
@@ -526,8 +535,8 @@ def automated_control_loop():
                                 new_ui_actions.append({
                                     "var_name": vn,
                                     "current_setpoint": curr,
-                                    "fingerprint_set_point": round(fingerprint_absolute, 4), # UI parses this as Final Target
-                                    "nudge_target": round(val, 4), # UI processes this as Nudge
+                                    "fingerprint_set_point": round(fingerprint_absolute, 4),
+                                    "nudge_target": round(val, 4),
                                     "final_target": round(final_tgt, 4),
                                     "diff": round(val - curr, 4),
                                     "reason": 'Upset Override' if vn in upset_targets else (orig.get('reason', 'Optimizing') if orig else 'Optimizing'),
@@ -623,12 +632,14 @@ def automated_control_loop():
                             recommendation['insights'] = insights
 
                             if setpoints:
-                                logger.info(f"[DB-WRITE] Measurement: {config.DB_MEASUREMENT_SETPOINTS} | Points: {len(setpoints)}")
-                                for vn, v in setpoints.items():
-                                    logger.debug(f"  -> {vn}: {v}")
-                                
                                 setpoint_map = process_model.get_setpoint_tag_map()
                                 scale_factors = process_model.get_setpoint_scale_factors()
+                                logger.info(f"[DB-WRITE] Measurement: {config.DB_MEASUREMENT_SETPOINTS} | Points: {len(setpoints)}")
+                                for vn, v in setpoints.items():
+                                    raw_tgt = next((a.get('fingerprint_set_point', v) for a in recommendation.get('actions', []) if a.get('var_name') == vn), v)
+                                    sf = scale_factors.get(vn, 1)
+                                    written = round(float(v) * sf, 4)
+                                    logger.info(f"  [DB-WRITE] {vn}: nudged={round(float(v),3)} | raw_target={round(float(raw_tgt),3)} | scale={sf} | written_to_db={written}")
                                 database.write_setpoints(datetime.utcnow(), setpoints, setpoint_map, scale_factors)
                                 control_service.service.execute_recommendation(recommendation)
 
