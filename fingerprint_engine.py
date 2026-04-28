@@ -500,9 +500,16 @@ def calculate_match_percentage(current_state, row, controls_cfg, indicators_cfg=
     if indicators_cfg:
         eval_vars.update(indicators_cfg)
 
-    # Multipliers for Priority-based weighting
-    # Priority 1 (O2, Amps, BZT) should dominate the score.
-    prio_multipliers = {1: 8.0, 2: 4.0, 3: 1.0, 4: 0.5, 5: 0.2}
+    # Multipliers for Priority-based weighting pulled from config
+    scoring_cfg = conf.get('scoring_settings', {})
+    raw_multipliers = scoring_cfg.get('priority_multipliers', {})
+    
+    # Map config strings to integers and apply defaults if config is missing
+    prio_multipliers = {
+        int(k): float(v) for k, v in raw_multipliers.items()
+    } if raw_multipliers else {
+        1: 8.0, 2: 4.0, 3: 1.0, 4: 0.5, 5: 0.2
+    }
 
     weighted_dist_sum, total_weight = 0.0, 0.0
     tag_contributions = []   # For diagnostic logging
