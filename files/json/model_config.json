@@ -1998,7 +1998,7 @@
       "description": "Maximise alternative fuel use (TSR) without raising SHC above baseline. Switch to SHC_MIN to target thermal efficiency instead.",
       "golden_prefilter": {
         "% TSR (Kiln)": {
-          "min": 20
+          "min": 5
         },
         "Kiln feed": {
           "min": 200
@@ -2140,12 +2140,12 @@
     },
     "enabled": true,
     "output_tag": "AI_SYSTEM_TRUST_STATUS",
+    "persistence_sec": 60,
     "thresholds": {
       "ai": 70,
       "fingerprint": 50,
       "hybrid_bias": 20
-    },
-    "persistence_sec": 60
+    }
   },
   "upset_conditions": {
     "cooler_grate_c1_stop": {

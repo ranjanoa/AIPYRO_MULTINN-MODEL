@@ -505,9 +505,17 @@ def calculate_match_percentage(current_state, row, controls_cfg, indicators_cfg=
     prio_multipliers = {1: 8.0, 2: 4.0, 3: 1.0, 4: 0.5, 5: 0.2}
 
     weighted_dist_sum, total_weight = 0.0, 0.0
+    tag_contributions = []   # For diagnostic logging
+    skipped_tags = []
 
     for tag, props in eval_vars.items():
         if tag in row:
+            # SKIP variables not present in current_state — missing data should not
+            # penalize the score. A tag absent from the live feed is simply unknown,
+            # not zero. Only compare what both sides have.
+            if tag not in current_state:
+                skipped_tags.append(tag)
+                continue
             curr_val = float(current_state.get(tag, 0))
             hist_val = float(row.get(tag, 0))
 
@@ -532,33 +540,44 @@ def calculate_match_percentage(current_state, row, controls_cfg, indicators_cfg=
 
             # --- Zero-Safe Deviation Calculation ---
             if abs(curr_val) < 1e-6 and abs(hist_val) < 1e-6:
-                # Both zero: No penalty
                 d_sq = 0.0
             elif abs(curr_val) > 1e-6:
-                # Standard relative distance
                 d_sq = ((abs(curr_val - hist_val) / abs(curr_val)) ** 2)
             else:
-                # current is 0, hist is not. Normalize by configured range.
                 v_min = float(props.get('default_min', props.get('min', 0)))
                 v_max = float(props.get('default_max', props.get('max', 100)))
                 v_range = abs(v_max - v_min)
                 if v_range > 1e-6:
                     d_sq = ((abs(curr_val - hist_val) / v_range) ** 2)
                 else:
-                    d_sq = 1.0  # Significant penalty if no range info
+                    d_sq = 1.0
 
-            weighted_dist_sum += (d_sq * w)
+            weighted_penalty = d_sq * w
+            weighted_dist_sum += weighted_penalty
             total_weight += w
+            tag_contributions.append((tag, curr_val, hist_val, prio, weighted_penalty))
 
     if total_weight == 0 or np.isnan(weighted_dist_sum): return 0.0
 
     avg_weighted_dist_sq = weighted_dist_sum / total_weight
     if np.isnan(avg_weighted_dist_sq): return 0.0
 
-    # Smoothed Gaussian falloff
-    # 0.5 coefficient provides intuitive sensitivity
     similarity = np.exp(-0.5 * avg_weighted_dist_sq) * 100.0
-    return max(0, min(100, round(float(similarity), 1)))
+    final_score = max(0, min(100, round(float(similarity), 1)))
+
+    # --- DIAGNOSTIC LOG ---
+    top_offenders = sorted(tag_contributions, key=lambda x: x[4], reverse=True)[:5]
+    offender_str = " | ".join(
+        f"{t}(P{p}): live={c:.2f} hist={h:.2f} pen={pen:.3f}"
+        for t, c, h, p, pen in top_offenders
+    )
+    engine_logger.info(
+        f"[SIMILARITY] Score={final_score}% | Compared={len(tag_contributions)} tags "
+        f"| Skipped={len(skipped_tags)} missing | AvgDist²={avg_weighted_dist_sq:.4f}\n"
+        f"  Top penalties: {offender_str}"
+    )
+
+    return final_score
 
 
 def _calculate_core_score(row, current_state, controls_cfg, weights=None, active_constraints=None, inv_cov=None,
@@ -1388,6 +1407,9 @@ def get_live_fingerprint_action(current_real_df_window, frontend_strategy=None):
                         f"| Primary ({primary_tag})={match_meta.get('primary_value_at_match', '?')} "
                         f"| TSR={match_meta.get('tsr_at_match', '?')}% "
                         f"| SHC={match_meta.get('shc_at_match', '?')} kcal/kg")
+                    engine_logger.info(
+                        f"[BATCH-SCORE] AUTO SCAN COMPLETE ✔ "
+                        f"Similarity={round(sim_pct, 1)}% stored in cache → will be retained until next scan.")
                 else:
                     engine_logger.warning("[AUTO] No matches found. Keeping previous target.")
                     LAST_AUTO_SCAN_TIME = now
@@ -1405,17 +1427,26 @@ def get_live_fingerprint_action(current_real_df_window, frontend_strategy=None):
                 sim_pct = match_meta.get('similarity_score', 0.0)
                 is_fallback = CACHED_AUTO_RESULT.get("is_fallback", False)
                 reason = "Best Match (Cached)"
+                engine_logger.info(
+                    f"[BATCH-SCORE] AUTO CACHED ↺ Target={target_disp} "
+                    f"| Serving retained score={sim_pct}% "
+                    f"| is_fallback={is_fallback}")
 
         # ARCHIVAL FIX: Always calculate similarity score, even for MANUAL targets.
         # This provides the operator with real-time feedback on how far they are from the target.
         # USER REQUEST (2026-04-24): For AUTO mode, retain the scan similarity; don't recalculate live.
         if mode != 'AUTO':
+            engine_logger.info(
+                f"[BATCH-SCORE] MANUAL LIVE CALC ► Target={target_disp} "
+                f"| Recalculating similarity against current plant state...")
             if target_vals and 'pure_historical_row' in locals():
                 sim_pct = calculate_match_percentage(current_state, pure_historical_row, controls_cfg, indicators_cfg)
+                engine_logger.info(f"[BATCH-SCORE] MANUAL RESULT ✔ Similarity={sim_pct}% (vs full historical row)")
                 if match_meta is not None:
                     match_meta['is_fallback'] = is_fallback
             elif target_vals:
                 sim_pct = calculate_match_percentage(current_state, target_vals, controls_cfg, indicators_cfg)
+                engine_logger.info(f"[BATCH-SCORE] MANUAL RESULT ✔ Similarity={sim_pct}% (vs target_vals only)")
                 if match_meta is not None:
                     match_meta['similarity_score'] = round(sim_pct, 1)
                     match_meta['is_fallback'] = is_fallback
@@ -1458,6 +1489,12 @@ def get_live_fingerprint_action(current_real_df_window, frontend_strategy=None):
         # CRITICAL: Synchronize metadata with the fresh live calculation
         match_meta['similarity_score'] = round(sim_pct, 1)
         match_meta['is_fallback'] = is_fallback
+
+        engine_logger.info(
+            f"[BATCH-SCORE] ➤ EMITTING TO UI | Mode={mode} "
+            f"| match_score={round(sim_pct, 1)}% "
+            f"| target={target_disp} "
+            f"| is_fallback={is_fallback}")
 
         return {
             "match_score": sim_pct,  # Dynamic similarity for ALL modes

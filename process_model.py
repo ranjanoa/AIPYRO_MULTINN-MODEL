@@ -152,8 +152,10 @@ def build_api_response(real_df, match_row, future_df, score, confidence, mode):
     for var, data in controls.items():
         col = data.get('tag_name', var)
         try:
-            curr_val = float(current_state.get(col, 0.0))
-            target_val = float(match_row.get(col, 0.0))
+            # DataFrames are already renamed to friendly names, so look up by
+            # friendly name (var) first, then fall back to raw tag_name (col)
+            curr_val = float(current_state.get(var, current_state.get(col, 0.0)))
+            target_val = float(match_row.get(var, match_row.get(col, 0.0)))
         except: continue
 
         diff = target_val - curr_val
@@ -197,10 +199,13 @@ def build_api_response(real_df, match_row, future_df, score, confidence, mode):
     top_vars = list(controls.keys())[:5]
     for v in top_vars:
         col = controls[v].get('tag_name', v)
-        if col in clean_real.columns:
-            live_history[v] = clean_real[col].fillna(0).tolist()
-        if col in clean_future.columns:
-            fingerprint_pred[v] = clean_future[col].fillna(0).tolist()
+        # Try friendly name first, then raw tag_name
+        real_col = v if v in clean_real.columns else (col if col in clean_real.columns else None)
+        fut_col = v if v in clean_future.columns else (col if col in clean_future.columns else None)
+        if real_col:
+            live_history[v] = clean_real[real_col].fillna(0).tolist()
+        if fut_col:
+            fingerprint_pred[v] = clean_future[fut_col].fillna(0).tolist()
 
     return {
         "match_score": score,
