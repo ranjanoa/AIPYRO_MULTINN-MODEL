@@ -538,17 +538,23 @@ def calculate_match_percentage(current_state, row, controls_cfg, indicators_cfg=
             prio = int(props.get('priority', 3))
             w = prio_multipliers.get(prio, 1.0)
 
-            # --- Zero-Safe Deviation Calculation ---
+            # --- Zero-Safe Deviation Calculation with Safety Cap ---
+            # Implementation of Bug #6 Fix: Prevent single-sensor blowouts (like O2 error) 
+            # from destroying the entire match score.
             if abs(curr_val) < 1e-6 and abs(hist_val) < 1e-6:
                 d_sq = 0.0
             elif abs(curr_val) > 1e-6:
-                d_sq = ((abs(curr_val - hist_val) / abs(curr_val)) ** 2)
+                raw_delta = abs(curr_val - hist_val) / abs(curr_val)
+                # Safety Cap: Max 400% (4.0) deviation per tag.
+                # Even if a sensor is 100x off, we only penalize it by 16.0 (4^2).
+                d_sq = min(raw_delta, 4.0) ** 2
             else:
                 v_min = float(props.get('default_min', props.get('min', 0)))
                 v_max = float(props.get('default_max', props.get('max', 100)))
                 v_range = abs(v_max - v_min)
                 if v_range > 1e-6:
-                    d_sq = ((abs(curr_val - hist_val) / v_range) ** 2)
+                    raw_delta = abs(curr_val - hist_val) / v_range
+                    d_sq = min(raw_delta, 4.0) ** 2
                 else:
                     d_sq = 1.0
 
@@ -1408,8 +1414,8 @@ def get_live_fingerprint_action(current_real_df_window, frontend_strategy=None):
                         f"| TSR={match_meta.get('tsr_at_match', '?')}% "
                         f"| SHC={match_meta.get('shc_at_match', '?')} kcal/kg")
                     engine_logger.info(
-                        f"[BATCH-SCORE] AUTO SCAN COMPLETE ✔ "
-                        f"Similarity={round(sim_pct, 1)}% stored in cache → will be retained until next scan.")
+                        f"[BATCH-SCORE] AUTO SCAN COMPLETE [OK] "
+                        f"Similarity={round(sim_pct, 1)}% stored in cache -> will be retained until next scan.")
                 else:
                     engine_logger.warning("[AUTO] No matches found. Keeping previous target.")
                     LAST_AUTO_SCAN_TIME = now
@@ -1428,7 +1434,7 @@ def get_live_fingerprint_action(current_real_df_window, frontend_strategy=None):
                 is_fallback = CACHED_AUTO_RESULT.get("is_fallback", False)
                 reason = "Best Match (Cached)"
                 engine_logger.info(
-                    f"[BATCH-SCORE] AUTO CACHED ↺ Target={target_disp} "
+                    f"[BATCH-SCORE] AUTO CACHED [RETAINED] Target={target_disp} "
                     f"| Serving retained score={sim_pct}% "
                     f"| is_fallback={is_fallback}")
 
@@ -1491,7 +1497,7 @@ def get_live_fingerprint_action(current_real_df_window, frontend_strategy=None):
         match_meta['is_fallback'] = is_fallback
 
         engine_logger.info(
-            f"[BATCH-SCORE] ➤ EMITTING TO UI | Mode={mode} "
+            f"[BATCH-SCORE] -> EMITTING TO UI | Mode={mode} "
             f"| match_score={round(sim_pct, 1)}% "
             f"| target={target_disp} "
             f"| is_fallback={is_fallback}")
@@ -1509,264 +1515,3 @@ def get_live_fingerprint_action(current_real_df_window, frontend_strategy=None):
     except Exception as e:
         engine_logger.error(f"Runtime Error: {e}", exc_info=True)
         return None
-
-
-# ==============================================================================
-# 7. LEGACY API SUPPORT (RESTORED)
-# ==============================================================================
-def calculate_deviation_ranges(real_data_series, user_deviation_json):
-    """
-    Tiered Constraint Architecture:
-    1. strict_ranges: The core process-alignment window (+/- 10%) - NOW RESTRICTED TO P1 ONLY
-    2. user_absolute_ranges: The physical equipment safety limits (clamping)
-    3. user_drift_ranges: The relative search window requested by the user
-    """
-    strict_ranges = {}
-    user_absolute_ranges = {}
-    user_drift_ranges = {}
-
-    deviation_data = user_deviation_json.get("deviation", {})
-    engine_logger.info("--- [SCAN] Calculating Tiered Deviation Ranges ---")
-
-    # Load config to check priorities
-    conf = get_model_config_safe()
-    if HAS_PROCESS_MODEL and process_model:
-        all_vars_cfg = {**process_model.get_control_variables(), **process_model.get_indicator_variables()}
-    else:
-        all_vars_cfg = {**conf.get('control_variables', {}), **conf.get('indicator_variables', {})}
-
-    # 1. Process User-defined deviations and Absolute Limits
-    for key, values in deviation_data.items():
-        if key not in real_data_series: continue
-        try:
-            current_value = float(real_data_series.get(key, 0))
-            if current_value == 0: continue
-
-            # ABSOLUTE LIMITS (Hard Equipment Constraints)
-            abs_min = values.get("Min")
-            abs_max = values.get("Max")
-            if abs_min is not None: user_absolute_ranges[key] = float(abs_min)
-            if abs_max is not None: user_absolute_ranges[key] = float(abs_max)
-
-            # DRIFT LIMITS (Relative search window)
-            lower_pct = float(values.get("Lower", 80)) / 100.0
-            higher_pct = float(values.get("Higher", 120)) / 100.0
-            calc_min = current_value * lower_pct
-            calc_max = current_value * higher_pct
-
-            # Clamp drift by absolute limits
-            final_min = float(abs_min) if abs_min is not None and calc_min < float(abs_min) else calc_min
-            final_max = float(abs_max) if abs_max is not None and calc_max > float(abs_max) else calc_max
-            user_drift_ranges[key] = (final_min, final_max)
-
-            # THE FIX: Only allow into strict_ranges if it is Priority 1
-            cfg_var = all_vars_cfg.get(key, {})
-            prio = int(cfg_var.get('priority', 3))
-
-            if prio == 1:
-                strict_ranges[key] = (final_min, final_max)
-                engine_logger.info(f"[SCAN] Priority 1 Control added to strict filter: {key}")
-            else:
-                engine_logger.debug(f"[SCAN] Bypassed strict filter for P{prio} variable: {key}")
-
-        except Exception:
-            continue
-
-    # 2. PRESERVED P1 INJECTION: Auto-inject Priority 1 Indicators
-    if HAS_PROCESS_MODEL and process_model:
-        indicators = process_model.get_indicator_variables()
-        for name, cfg in indicators.items():
-            if int(cfg.get('priority', 3)) == 1:
-                tag = cfg.get('tag_name', name)
-                if tag in real_data_series and tag not in strict_ranges:
-                    try:
-                        curr_val = float(real_data_series[tag])
-                        strict_tol = float(conf.get('logic_tags', {}).get('strict_search_tolerance', 0.1))
-
-                        # Enforce a strict process alignment window for P1
-                        strict_ranges[tag] = (curr_val * (1 - strict_tol), curr_val * (1 + strict_tol))
-                        engine_logger.info(f"[SCAN] Strict P1 Injection: {tag} [{(1 - strict_tol) * 100:.0f}% tol]")
-                    except:
-                        pass
-
-    return strict_ranges, user_absolute_ranges, user_drift_ranges
-
-
-def filter_historical_by_deviation(historical_df, strict_ranges):
-    if historical_df.empty: return pd.DataFrame()
-    initial_count = len(historical_df)
-    engine_logger.info(f"--- [SCAN] Filtering History (Initial: {initial_count}) ---")
-    df_filtered = historical_df.copy()
-    try:
-        # Use strict_ranges as the primary hard filter
-        for col, (min_val, max_val) in strict_ranges.items():
-            if col in df_filtered.columns:
-                prev_len = len(df_filtered)
-                df_filtered = df_filtered[df_filtered[col].between(min_val, max_val)]
-                new_len = len(df_filtered)
-                if prev_len - new_len > 0:
-                    engine_logger.info(
-                        f"Filter {col} [{min_val:.1f}-{max_val:.1f}]: Removed {prev_len - new_len} rows. Remaining: {new_len}")
-        return df_filtered
-    except Exception as e:
-        engine_logger.error(f"Filtering Error: {e}")
-        return pd.DataFrame()
-
-
-def rank_and_select_recommendations(historical_df, candidates, weights=None, current_state=None, controls_cfg=None,
-                                    **kwargs):
-    engine_logger.info("--- [SCAN] Ranking & Selection Started ---")
-    ts_col = get_timestamp_col()
-    if isinstance(candidates, list):
-        df = historical_df[historical_df[ts_col].isin(candidates)].copy()
-    elif hasattr(candidates, 'empty'):
-        df = candidates.copy() if not candidates.empty else pd.DataFrame()
-    else:
-        return []
-    if df.empty: return []
-
-    conf = get_model_config_safe()
-    df['score'] = 0.0
-    if weights:
-        for tag, w in weights.items():
-            if tag in df.columns:
-                df['score'] += df[tag].fillna(0) * w
-
-    if isinstance(current_state, dict) and controls_cfg:
-        dist_sum = pd.Series(0.0, index=df.index)
-
-        for tag, props in controls_cfg.items():
-            if tag not in df.columns: continue
-            try:
-                user_min = float(props.get('min', props.get('Min', props.get('default_min', -9e9))))
-                user_max = float(props.get('max', props.get('Max', props.get('default_max', 9e9))))
-
-                out_of_bounds = (df[tag] < user_min) | (df[tag] > user_max)
-                df.loc[out_of_bounds, 'score'] = -999999.9
-
-                prio = int(props.get('priority', 3))
-                curr_val = float(current_state.get(tag, 0))
-
-                # Use specific heat input for fuel tags
-                if tag in conf.get('fuel_calorific_pairing', {}):
-                    curr_val = get_heat_input(tag, curr_val, current_state, conf)
-
-                if curr_val != 0:
-                    scoring_cfg = conf.get('scoring_settings', {})
-                    multipliers = scoring_cfg.get('priority_multipliers', {'1': 10.0, '2': 5.0})
-                    weight = float(multipliers.get(str(prio), 1.0))
-
-                    hist_vals = df[tag].copy()
-                    ratios = np.abs(curr_val / hist_vals.replace(0, np.nan))
-                    hist_vals = np.where((ratios > 800) & (ratios < 1200), hist_vals * 1000.0, hist_vals)
-                    hist_vals = np.where((ratios > 0.0008) & (ratios < 0.0012), hist_vals / 1000.0, hist_vals)
-                    hist_vals = np.where((ratios > 80) & (ratios < 120), hist_vals * 100.0, hist_vals)
-
-                    dist_sum += ((np.abs(curr_val - hist_vals) / curr_val) ** 2) * weight
-
-            except Exception:
-                continue
-
-        p_weight = conf.get('scoring_settings', {}).get('distance_penalty_weight', 1000.0)
-        df['score'] -= (dist_sum * p_weight)
-
-    if ts_col in df.columns:
-        now = pd.Timestamp.now()
-        age_days = (now - df[ts_col]).dt.total_seconds() / 86400.0
-        age_penalty = conf.get('scoring_settings', {}).get('age_penalty_per_day', 0.05)
-        df['score'] -= (age_days.fillna(0) * age_penalty)
-
-    df = df.sort_values(by=['score'], ascending=False)
-    stable_candidates = []
-    unstable_candidates = []
-
-    # DIVERSITY CHECK: Ensure matches are at least 120 minutes apart
-    diversity_minutes = 120
-
-    for _, row in df.iterrows():
-        ts = row[ts_col]
-        score = row['score']
-
-        # Check if this timestamp is too close to any already selected candidate
-        is_diverse = True
-        for existing_ts in stable_candidates:
-            if abs((ts - existing_ts).total_seconds()) < (diversity_minutes * 60):
-                is_diverse = False
-                break
-
-        if not is_diverse:
-            continue
-
-        # STABILITY CHECK: Only requires 30 minutes survival ahead
-        if check_future_stability(historical_df, ts):
-            stable_candidates.append(ts)
-            if len(stable_candidates) <= 5:
-                engine_logger.info(f"MATCH #{len(stable_candidates)}: {ts} (Score: {score:.1f}) - Stable: YES")
-        else:
-            unstable_candidates.append(ts)
-
-        if len(stable_candidates) >= 5: break
-
-    # If we don't have enough stable/diverse matches, fill with unstable (also respecting diversity)
-    if len(stable_candidates) < 5:
-        for ts in unstable_candidates:
-            is_diverse = True
-            for existing_ts in stable_candidates:
-                if abs((ts - existing_ts).total_seconds()) < (diversity_minutes * 60):
-                    is_diverse = False
-                    break
-            if is_diverse:
-                stable_candidates.append(ts)
-            if len(stable_candidates) >= 5: break
-
-    return stable_candidates[:5]
-
-
-def pre_filter_by_constraints(historical_df, current_state, controls_cfg):
-    if not controls_cfg or not isinstance(current_state, dict): return historical_df
-    df_filtered = historical_df.copy()
-    conf = get_model_config_safe()
-    for tag, cfg in controls_cfg.items():
-        try:
-            if int(cfg.get('priority', 100)) == 1:
-                val = float(current_state.get(tag, 0))
-                if val == 0: continue
-
-                # Use heat input for fuel tags
-                if tag in conf.get('fuel_calorific_pairing', {}):
-                    val = get_heat_input(tag, val, current_state, conf)
-
-                min_v, max_v = val * 0.75, val * 1.25
-                if tag in df_filtered.columns:
-                    df_filtered = df_filtered[df_filtered[tag].between(min_v, max_v)]
-                if len(df_filtered) < 5: return historical_df
-        except:
-            continue
-    return df_filtered
-
-
-def find_candidates_hierarchical(hist_df, current_state, controls_cfg, indicators_cfg):
-    engine_logger.info("--- [SCAN] Starting Hierarchical Candidate Search ---")
-    all_vars = {}
-    if controls_cfg: all_vars.update(controls_cfg)
-    if indicators_cfg: all_vars.update(indicators_cfg)
-    p1_vars = {k: v for k, v in all_vars.items() if int(v.get('priority', 99)) == 1}
-
-    def get_auto_ranges(vars_dict, multiplier=1.0):
-        ranges = {}
-        for tag, cfg in vars_dict.items():
-            if tag in current_state:
-                try:
-                    val = float(current_state[tag])
-                    if val != 0:
-                        ranges[tag] = (val * (1.0 - (0.10 * multiplier)), val * (1.0 + (0.10 * multiplier)))
-                except:
-                    pass
-        return ranges
-
-    engine_logger.info("[SCAN] Attempting Pass 1: Strict +/- 10% on Priority 1 tags")
-    candidates = filter_historical_by_deviation(hist_df, get_auto_ranges(p1_vars, 1.0))
-    if candidates.empty:
-        engine_logger.info("[SCAN] Pass 1 yielded 0 results. Attempting Pass 2: Loose +/- 30%")
-        candidates = filter_historical_by_deviation(hist_df, get_auto_ranges(p1_vars, 3.0))
-    return candidates if not candidates.empty else pd.DataFrame()
