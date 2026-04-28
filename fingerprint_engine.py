@@ -545,16 +545,16 @@ def calculate_match_percentage(current_state, row, controls_cfg, indicators_cfg=
                 d_sq = 0.0
             elif abs(curr_val) > 1e-6:
                 raw_delta = abs(curr_val - hist_val) / abs(curr_val)
-                # Safety Cap: Max 400% (4.0) deviation per tag.
-                # Even if a sensor is 100x off, we only penalize it by 16.0 (4^2).
-                d_sq = min(raw_delta, 4.0) ** 2
+                # Safety Cap: Max 200% (2.0) deviation per tag.
+                # Even if a sensor is 100x off, we only penalize it by 4.0 (2^2).
+                d_sq = min(raw_delta, 2.0) ** 2
             else:
                 v_min = float(props.get('default_min', props.get('min', 0)))
                 v_max = float(props.get('default_max', props.get('max', 100)))
                 v_range = abs(v_max - v_min)
                 if v_range > 1e-6:
                     raw_delta = abs(curr_val - hist_val) / v_range
-                    d_sq = min(raw_delta, 4.0) ** 2
+                    d_sq = min(raw_delta, 2.0) ** 2
                 else:
                     d_sq = 1.0
 
