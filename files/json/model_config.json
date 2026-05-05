@@ -63,9 +63,9 @@
       "default_min": 0,
       "description": "Cooler BF fan speed",
       "filtering": {
-        "ema_alpha": 0.2,
+        "ema_alpha": 0.1,
         "enabled": true,
-        "median_window": 3
+        "median_window": 7
       },
       "is_setpoint": true,
       "nudge_speed": 0.2,
@@ -349,9 +349,9 @@
       "default_min": 0,
       "description": "RIP main burner",
       "filtering": {
-        "ema_alpha": 0.2,
+        "ema_alpha": 0.1,
         "enabled": true,
-        "median_window": 3
+        "median_window": 11
       },
       "is_setpoint": true,
       "nudge_speed": 1,
@@ -2168,7 +2168,7 @@
         }
       ],
       "description": "Grate Central 1 stop - increase other grates",
-      "enabled": true,
+      "enabled": false,
       "group": "COOLER",
       "priority": 4,
       "trigger_logic": {
@@ -2198,7 +2198,7 @@
         }
       ],
       "description": "Grate Central 2 stop - increase other grates",
-      "enabled": true,
+      "enabled": false,
       "group": "COOLER",
       "priority": 4,
       "trigger_logic": {
@@ -2228,7 +2228,7 @@
         }
       ],
       "description": "Grate Left stop - increase other grates",
-      "enabled": true,
+      "enabled": false,
       "group": "COOLER",
       "priority": 4,
       "trigger_logic": {
@@ -2258,7 +2258,7 @@
         }
       ],
       "description": "Grate Right stop - increase other grates",
-      "enabled": true,
+      "enabled": false,
       "group": "COOLER",
       "priority": 4,
       "trigger_logic": {

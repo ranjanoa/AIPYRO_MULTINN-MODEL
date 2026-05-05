@@ -49,7 +49,16 @@ export function initCharts() {
                     y: { 
                         grid: { color: darkGrid }, 
                         ticks: { color: darkText },
-                        display: true
+                        display: true,
+                        afterDataLimits: (scale) => {
+                            const range = scale.max - scale.min;
+                            const minRange = Math.max(Math.abs(scale.max) * 0.05, 1);
+                            if (range < minRange) {
+                                const center = (scale.max + scale.min) / 2;
+                                scale.max = center + minRange / 2;
+                                scale.min = center - minRange / 2;
+                            }
+                        }
                     }
                 },
                 plugins: {
@@ -63,7 +72,19 @@ export function initCharts() {
                 animation: false,
                 scales: {
                     x: { type: 'time', time: { unit: 'minute' }, grid: { display: false }, ticks: { color: darkText } },
-                    y: { grid: { color: darkGrid }, ticks: { color: darkText } }
+                    y: { 
+                        grid: { color: darkGrid }, 
+                        ticks: { color: darkText },
+                        afterDataLimits: (scale) => {
+                            const range = scale.max - scale.min;
+                            const minRange = Math.max(Math.abs(scale.max) * 0.05, 1);
+                            if (range < minRange) {
+                                const center = (scale.max + scale.min) / 2;
+                                scale.max = center + minRange / 2;
+                                scale.min = center - minRange / 2;
+                            }
+                        }
+                    }
                 },
                 elements: { point: { radius: 0 } },
                 plugins: {

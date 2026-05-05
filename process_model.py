@@ -73,14 +73,18 @@ def apply_signal_filters(df):
         if median_window > 1:
             s = df[target_col].dropna()
             if not s.empty:
-                df[target_col] = s.rolling(window=median_window, min_periods=1).median()
+                s_events = s.loc[s.shift() != s]
+                filtered = s_events.rolling(window=median_window, min_periods=1).median()
+                df[target_col] = filtered.reindex(s.index).ffill()
             
         # 2. Exponential Moving Average (High Frequency Noise Smoothing)
         ema_alpha = float(filter_cfg.get('ema_alpha', 1.0))
         if ema_alpha < 1.0:
             s = df[target_col].dropna()
             if not s.empty:
-                df[target_col] = s.ewm(alpha=ema_alpha, adjust=False).mean()
+                s_events = s.loc[s.shift() != s]
+                filtered = s_events.ewm(alpha=ema_alpha, adjust=False).mean()
+                df[target_col] = filtered.reindex(s.index).ffill()
             
     return df
 

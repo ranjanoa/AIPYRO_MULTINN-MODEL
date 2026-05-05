@@ -34,7 +34,16 @@ export function drawOpSummaryChart() {
                     display: idx === 0, // Show first axis as reference
                     position: 'left',
                     grid: { display: idx === 0, color: '#2d4a54' },
-                    ticks: { color: '#aabdc4' }
+                    ticks: { color: '#aabdc4' },
+                    afterDataLimits: (scale) => {
+                        const range = scale.max - scale.min;
+                        const minRange = Math.max(Math.abs(scale.max) * 0.05, 1); // Minimum 5% span or 1 unit
+                        if (range < minRange) {
+                            const center = (scale.max + scale.min) / 2;
+                            scale.max = center + minRange / 2;
+                            scale.min = center - minRange / 2;
+                        }
+                    }
                 };
 
                 let histData = [];

@@ -184,7 +184,9 @@ def background_data_emitter():
             tag_list = list(tag_map.keys())
             if tag_list:
                 end_time = datetime.utcnow()
-                start_time = end_time - timedelta(minutes=1)
+                # Use 15 minutes of history so stateful filters (EMA) can converge 
+                # fully before extracting the final row for the live UI.
+                start_time = end_time - timedelta(minutes=15)
 
                 # Fetch live data
                 df = database.get_realtime_data_window(start_time, end_time, tag_list, tag_map)
