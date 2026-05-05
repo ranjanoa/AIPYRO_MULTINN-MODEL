@@ -64,19 +64,23 @@ def apply_signal_filters(df):
         if not filter_cfg.get('enabled', False):
             continue
             
-        tag_name = cfg.get('tag_name', friendly_name)
-        if tag_name not in df.columns:
+        target_col = friendly_name
+        if target_col not in df.columns:
             continue
             
         # 1. Rolling Median (Outlier/Spike Rejection)
         median_window = int(filter_cfg.get('median_window', 1))
         if median_window > 1:
-            df[tag_name] = df[tag_name].rolling(window=median_window, min_periods=1).median()
+            s = df[target_col].dropna()
+            if not s.empty:
+                df[target_col] = s.rolling(window=median_window, min_periods=1).median()
             
         # 2. Exponential Moving Average (High Frequency Noise Smoothing)
         ema_alpha = float(filter_cfg.get('ema_alpha', 1.0))
         if ema_alpha < 1.0:
-            df[tag_name] = df[tag_name].ewm(alpha=ema_alpha, adjust=False).mean()
+            s = df[target_col].dropna()
+            if not s.empty:
+                df[target_col] = s.ewm(alpha=ema_alpha, adjust=False).mean()
             
     return df
 

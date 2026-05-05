@@ -33,8 +33,17 @@ def _rename_and_format_df(df, tag_map):
     df = df.rename(columns=tag_map)
     df[config.TIMESTAMP_COLUMN] = pd.to_datetime(df[config.TIMESTAMP_COLUMN])
 
-    # 5. Resample and Fill (Pandas 3.0 Syntax: No 'method' in fillna)
+    # Set index and sort before filtering
     df = df.set_index(config.TIMESTAMP_COLUMN).sort_index()
+
+    # Apply configured signal filtering rules on RAW data BEFORE oversampling
+    try:
+        import process_model
+        df = process_model.apply_signal_filters(df)
+    except Exception as e:
+        print(f"Error applying signal filters: {e}")
+
+    # 5. Resample and Fill (Pandas 3.0 Syntax: No 'method' in fillna)
     df = df.resample(config.RESAMPLE_INTERVAL).first()
 
     if config.FILL_METHOD == 'bfill':
@@ -43,13 +52,6 @@ def _rename_and_format_df(df, tag_map):
         df = df.ffill()
 
     df = df.reset_index()
-
-    # Apply configured signal filtering rules
-    try:
-        import process_model
-        df = process_model.apply_signal_filters(df)
-    except Exception as e:
-        print(f"Error applying signal filters: {e}")
 
     return df
 
