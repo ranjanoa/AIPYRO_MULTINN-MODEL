@@ -2441,3 +2441,80 @@ Rejected at tag: Petcoke (Kiln)
 Current RT value: 6.6945
 Target range: [5.6903 to 5.0000]
 Config Limits: [0.0 to 5.0]
+
+--- 2026-05-05T15:53:56.860327 ---
+Phase: Standard
+Rejected at tag: RIP (Kiln)
+Current RT value: 1305.4848
+Target range: [979.1136 to 1631.8560]
+Config Limits: [0.0 to 2000.0]
+
+--- 2026-05-05T16:37:37.493041 ---
+Phase: Standard
+Rejected at tag: RIP (Kiln)
+Current RT value: 0.0000
+Target range: [0.0000 to 0.0000]
+Config Limits: [0.0 to 2000.0]
+
+--- 2026-05-05T16:39:57.525754 ---
+Phase: Standard
+Rejected at tag: RIP (Kiln)
+Current RT value: 0.0000
+Target range: [0.0000 to 0.0000]
+Config Limits: [0.0 to 2000.0]
+
+--- 2026-05-05T16:42:12.604494 ---
+Phase: Standard
+Rejected at tag: RIP (Kiln)
+Current RT value: 0.0000
+Target range: [0.0000 to 0.0000]
+Config Limits: [0.0 to 2000.0]
+
+--- 2026-05-05T16:44:13.603637 ---
+Phase: Standard
+Rejected at tag: RIP (Kiln)
+Current RT value: 0.0000
+Target range: [0.0000 to 0.0000]
+Config Limits: [0.0 to 2000.0]
+
+--- 2026-05-05T16:46:27.010913 ---
+Phase: Standard
+Rejected at tag: Free CaO
+Current RT value: 1.5000
+Target range: [1.1250 to 1.8750]
+Config Limits: [0.0 to 5.0]
+
+--- 2026-05-05T16:57:28.915920 ---
+Phase: Standard
+Rejected at tag: Coal Mill (ON/OFF)
+Current RT value: 0.0000
+Target range: [0.0000 to 0.0000]
+Config Limits: [0.0 to 1.0]
+
+--- 2026-05-05T16:59:43.297554 ---
+Phase: Standard
+Rejected at tag: Coal Mill (ON/OFF)
+Current RT value: 0.0000
+Target range: [0.0000 to 0.0000]
+Config Limits: [0.0 to 1.0]
+
+--- 2026-05-05T17:01:57.843514 ---
+Phase: Standard
+Rejected at tag: Coal Mill (ON/OFF)
+Current RT value: 0.0000
+Target range: [0.0000 to 0.0000]
+Config Limits: [0.0 to 1.0]
+
+--- 2026-05-05T17:04:11.590726 ---
+Phase: Standard
+Rejected at tag: Coal Mill (ON/OFF)
+Current RT value: 0.0000
+Target range: [0.0000 to 0.0000]
+Config Limits: [0.0 to 1.0]
+
+--- 2026-05-05T17:12:45.430128 ---
+Phase: Standard
+Rejected at tag: RDF 1 (PC)
+Current RT value: 2.0000
+Target range: [1.5000 to 2.5001]
+Config Limits: [0.0 to 10.0]

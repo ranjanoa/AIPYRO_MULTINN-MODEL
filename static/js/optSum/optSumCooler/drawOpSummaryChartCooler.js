@@ -8,11 +8,34 @@ export function drawOpSummaryChartCooler() {
 
             // STRICTLY ONLY variables manually selected by the user
             const varsToPlot = [...state.opActiveTrendsCooler];
+            const scales = {
+                x: {
+                    type: 'linear',
+                    min: -15,
+                    max: 15,
+                    ticks: {
+                        stepSize: 5,
+                        color: '#aabdc4',
+                        callback: function (val) { return val + 'm'; }
+                    },
+                    grid: { color: '#2d4a54' }
+                },
+                y: { display: false }
+            };
 
             varsToPlot.slice(0, 8).forEach((tag, idx) => {
                 const color = colors[idx % colors.length];
-                let histData = [];
+                const yAxisId = `y-${tag.replace(/[^a-zA-Z0-9]/g, '')}`;
 
+                // Add dynamic scale for this variable
+                scales[yAxisId] = {
+                    display: idx === 0, // Show first axis as reference
+                    position: 'left',
+                    grid: { display: idx === 0, color: '#2d4a54' },
+                    ticks: { color: '#aabdc4' }
+                };
+
+                let histData = [];
                 if (state.opHistoryDataCooler[tag]) {
                     histData = state.opHistoryDataCooler[tag].map(pt => ({
                         x: -((now - pt.ts) / 60000),
@@ -26,17 +49,15 @@ export function drawOpSummaryChartCooler() {
                     borderColor: color,
                     borderWidth: 2,
                     pointRadius: 0,
-                    tension: 0.1
+                    tension: 0.1,
+                    yAxisID: yAxisId
                 });
 
-                // Guarantee a prediction line even for indicator variables lacking a backend array
+                // Guarantee a prediction line
                 let predDataRaw = state.opPredictionDataCooler[tag];
                 if (!predDataRaw || predDataRaw.length === 0) {
                     const curr = state.latestLiveValues[tag] !== undefined ? parseFloat(state.latestLiveValues[tag]) : (histData.length > 0 ? histData[histData.length - 1].y : 0);
-                    predDataRaw = [];
-                    for (let m = 0; m <= 15; m++) {
-                        predDataRaw.push(curr); // Flatline forward projection for indicators without AI targets
-                    }
+                    predDataRaw = Array(16).fill(curr);
                 }
 
                 let predData = predDataRaw.map((val, minFromNow) => ({
@@ -45,7 +66,7 @@ export function drawOpSummaryChartCooler() {
                 })).filter(pt => pt.x <= 15);
 
                 if (histData.length > 0) {
-                    predData.unshift({ x: 0, y: histData[histData.length - 1].y }); // Connect line smoothly
+                    predData.unshift({ x: 0, y: histData[histData.length - 1].y });
                 }
 
                 datasets.push({
@@ -55,10 +76,13 @@ export function drawOpSummaryChartCooler() {
                     borderWidth: 2,
                     borderDash: [4, 4],
                     pointRadius: 0,
-                    tension: 0.1
+                    tension: 0.1,
+                    yAxisID: yAxisId
                 });
             });
 
+            state.charts.opSummaryCoolerChartCanvas.options.scales = scales;
             state.charts.opSummaryCoolerChartCanvas.data.datasets = datasets;
             state.charts.opSummaryCoolerChartCanvas.update('none');
+
 }

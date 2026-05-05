@@ -1523,6 +1523,19 @@ def get_live_fingerprint_action(current_real_df_window, frontend_strategy=None):
                 "reason": reason_final
             })
 
+        # 2. GENERATE CALCULATED ACTIONS (derived variables)
+        # We pass the standard ui_actions as context so the derived variables
+        # can calculate their own synchronous nudges.
+        calc_actions = process_model.generate_calculated_actions(
+            ui_actions, current_state, controls_cfg, indicators_cfg, calc_vars_cfg
+        )
+        
+        # Merge calculated actions into the final list
+        # Overwrite standard actions if there's a name collision
+        calc_names = {c['var_name'] for c in calc_actions}
+        ui_actions = [a for a in ui_actions if a.get('var_name') not in calc_names]
+        ui_actions.extend(calc_actions)
+
         # CRITICAL: Synchronize metadata with the fresh live calculation
         match_meta['similarity_score'] = round(sim_pct, 1)
         match_meta['is_fallback'] = is_fallback

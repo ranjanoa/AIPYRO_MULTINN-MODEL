@@ -4,9 +4,10 @@ const nowLinePlugin = {
     beforeDraw: chart => {
         const ctx = chart.ctx;
         const xAxis = chart.scales.x;
-        const yAxis = chart.scales.y;
+        // Fallback to the first available Y-axis if 'y' is missing (for multi-axis charts)
+        const yAxis = chart.scales.y || Object.values(chart.scales).find(s => s.id.startsWith('y-'));
 
-        if (xAxis.min <= 0 && xAxis.max >= 0) {
+        if (xAxis && yAxis && xAxis.min <= 0 && xAxis.max >= 0) {
             const x = xAxis.getPixelForValue(0);
             ctx.save();
             ctx.beginPath();
@@ -23,6 +24,7 @@ const nowLinePlugin = {
             ctx.fillText('NOW', x - 12, yAxis.bottom - 5);
         }
     }
+
 }
 export function initCharts() {
     if (typeof Chart === 'undefined') return;
@@ -36,8 +38,19 @@ export function initCharts() {
                 maintainAspectRatio: false,
                 animation: false,
                 scales: {
-                    x: { type: 'linear', min: -5, max: 30, ticks: { stepSize: 5, color: darkText }, grid: { color: darkGrid }, title: { display: true, text: 'Minutes from Now', color: darkText } },
-                    y: { grid: { color: darkGrid }, ticks: { color: darkText } }
+                    x: { 
+                        type: 'linear', 
+                        min: -5, 
+                        max: 30, 
+                        ticks: { stepSize: 5, color: darkText }, 
+                        grid: { color: darkGrid }, 
+                        title: { display: true, text: 'Minutes from Now', color: darkText } 
+                    },
+                    y: { 
+                        grid: { color: darkGrid }, 
+                        ticks: { color: darkText },
+                        display: true
+                    }
                 },
                 plugins: {
                     legend: { labels: { boxWidth: 12, color: darkText } }
@@ -58,6 +71,54 @@ export function initCharts() {
                 }
             };
 
+            const multiAxisOpts = {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false,
+                interaction: { mode: 'index', intersect: false },
+                scales: {
+                    x: { 
+                        type: 'linear', 
+                        min: -15, 
+                        max: 15, 
+                        ticks: { 
+                            stepSize: 5, 
+                            color: darkText, 
+                            callback: function (val) { return val + 'm'; } 
+                        }, 
+                        grid: { color: darkGrid } 
+                    },
+                    y: { display: false } // Base axis hidden, dynamic ones will be added
+                },
+                plugins: {
+                    legend: { 
+                        labels: { 
+                            boxWidth: 10, 
+                            color: darkText, 
+                            usePointStyle: true, 
+                            pointStyle: 'line',
+                            font: { size: 10, weight: 'bold' }
+                        } 
+                    },
+                    tooltip: { 
+                        backgroundColor: 'rgba(18, 42, 51, 0.95)', 
+                        titleColor: '#ebf552',
+                        borderColor: '#2d4a54',
+                        borderWidth: 1,
+                        padding: 10,
+                        bodyFont: { size: 11 },
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) label += ': ';
+                                if (context.parsed.y !== null) label += context.parsed.y.toFixed(2);
+                                return label;
+                            }
+                        }
+                    }
+                }
+            };
+
             if (document.getElementById('time-series-chart')) {
                 state.charts.timeSeriesChart = new Chart(document.getElementById('time-series-chart'), { type: 'line', data: { datasets: [] }, options: dashOpts });
             }
@@ -70,86 +131,27 @@ export function initCharts() {
             if (document.getElementById('mbrl-uncertainty-chart')) {
                 state.charts.mbrlUncertChart = new Chart(document.getElementById('mbrl-uncertainty-chart'), { type: 'bar', data: { labels: Array(20).fill(''), datasets: [{ label: 'Conf', data: Array(20).fill(0.1), backgroundColor: '#476570' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false, max: 1.0 } } } });
             }
+            
+            // Shared multi-axis initialization for all optimization summary charts
             if (document.getElementById('op-summary-chart-canvas')) {
                 state.charts.opSummaryChartCanvas = new Chart(document.getElementById('op-summary-chart-canvas'), {
-                    type: 'line',
-                    data: { datasets: [] },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        animation: false,
-                        interaction: { mode: 'index', intersect: false },
-                        scales: {
-                            x: { type: 'linear', min: -15, max: 15, ticks: { stepSize: 5, color: darkText, callback: function (val) { return val + 'm'; } }, grid: { color: darkGrid } },
-                            y: { grid: { color: darkGrid }, ticks: { color: darkText } }
-                        },
-                        plugins: {
-                            legend: { labels: { boxWidth: 10, color: darkText, usePointStyle: true, pointStyle: 'line' } },
-                            tooltip: { backgroundColor: '#122a33', titleColor: '#ebf552' }
-                        }
-                    }
+                    type: 'line', data: { datasets: [] }, options: JSON.parse(JSON.stringify(multiAxisOpts))
                 });
             }
-
-              if (document.getElementById('op-summary-chart-canvas-kiln')) {
+            if (document.getElementById('op-summary-chart-canvas-kiln')) {
                 state.charts.opSummarykilnChartCanvas = new Chart(document.getElementById('op-summary-chart-canvas-kiln'), {
-                    type: 'line',
-                    data: { datasets: [] },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        animation: false,
-                        interaction: { mode: 'index', intersect: false },
-                        scales: {
-                            x: { type: 'linear', min: -15, max: 15, ticks: { stepSize: 5, color: darkText, callback: function (val) { return val + 'm'; } }, grid: { color: darkGrid } },
-                            y: { grid: { color: darkGrid }, ticks: { color: darkText } }
-                        },
-                        plugins: {
-                            legend: { labels: { boxWidth: 10, color: darkText, usePointStyle: true, pointStyle: 'line' } },
-                            tooltip: { backgroundColor: '#122a33', titleColor: '#ebf552' }
-                        }
-                    }
+                    type: 'line', data: { datasets: [] }, options: JSON.parse(JSON.stringify(multiAxisOpts))
                 });
             }
-
-             if (document.getElementById('op-summary-chart-canvas-preheater')) {
+            if (document.getElementById('op-summary-chart-canvas-preheater')) {
                 state.charts.opSummaryPreheaterChartCanvas = new Chart(document.getElementById('op-summary-chart-canvas-preheater'), {
-                    type: 'line',
-                    data: { datasets: [] },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        animation: false,
-                        interaction: { mode: 'index', intersect: false },
-                        scales: {
-                            x: { type: 'linear', min: -15, max: 15, ticks: { stepSize: 5, color: darkText, callback: function (val) { return val + 'm'; } }, grid: { color: darkGrid } },
-                            y: { grid: { color: darkGrid }, ticks: { color: darkText } }
-                        },
-                        plugins: {
-                            legend: { labels: { boxWidth: 10, color: darkText, usePointStyle: true, pointStyle: 'line' } },
-                            tooltip: { backgroundColor: '#122a33', titleColor: '#ebf552' }
-                        }
-                    }
+                    type: 'line', data: { datasets: [] }, options: JSON.parse(JSON.stringify(multiAxisOpts))
                 });
             }
             if (document.getElementById('op-summary-chart-canvas-cooler')) {
                 state.charts.opSummaryCoolerChartCanvas = new Chart(document.getElementById('op-summary-chart-canvas-cooler'), {
-                    type: 'line',
-                    data: { datasets: [] },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        animation: false,
-                        interaction: { mode: 'index', intersect: false },
-                        scales: {
-                            x: { type: 'linear', min: -15, max: 15, ticks: { stepSize: 5, color: darkText, callback: function (val) { return val + 'm'; } }, grid: { color: darkGrid } },
-                            y: { grid: { color: darkGrid }, ticks: { color: darkText } }
-                        },
-                        plugins: {
-                            legend: { labels: { boxWidth: 10, color: darkText, usePointStyle: true, pointStyle: 'line' } },
-                            tooltip: { backgroundColor: '#122a33', titleColor: '#ebf552' }
-                        }
-                    }
+                    type: 'line', data: { datasets: [] }, options: JSON.parse(JSON.stringify(multiAxisOpts))
                 });
             }
 }
+

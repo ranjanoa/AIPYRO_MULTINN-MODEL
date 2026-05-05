@@ -301,43 +301,57 @@ def generate_calculated_actions(raw_actions, state_map, controls_cfg, indicators
     nudge_cfg = full_conf.get('nudge_settings', {})
     default_step_fraction = nudge_cfg.get('step_fraction', 0.15)
 
+    # 1. FINAL TARGET CONTEXT (The ultimate goal)
     target_context = state_map.copy()
+    # 2. NUDGE CONTEXT (The immediate commanded step)
+    nudge_context = state_map.copy()
+
     for action in raw_actions:
-        # Use absolute targets to evaluate the formula's eventual goal
-        target_context[action['var_name']] = action['fingerprint_set_point']
+        # Use absolute targets for the final goal
+        target_context[action['var_name']] = action.get('fingerprint_set_point', action.get('final_target', state_map.get(action['var_name'])))
+        # Use nudged targets for the immediate step
+        nudge_context[action['var_name']] = action.get('nudge_target', target_context[action['var_name']])
         
     calculated_targets = evaluate_formulas(target_context, controls_cfg, indicators_cfg, calc_vars_cfg)
+    calculated_nudges = evaluate_formulas(nudge_context, controls_cfg, indicators_cfg, calc_vars_cfg)
     calculated_currents = evaluate_formulas(state_map, controls_cfg, indicators_cfg, calc_vars_cfg)
     
     new_actions = []
     for k, cfg in calc_vars_cfg.items():
-        if cfg.get('is_control'):
+        if cfg.get('is_control') or cfg.get('is_setpoint'):
             name = cfg.get('friendly_name', k)
             curr_val = float(calculated_currents.get(name, 0.0))
-            target_val = float(calculated_targets.get(name, 0.0))
+            final_target = float(calculated_targets.get(name, 0.0))
+            
+            # The nudged target for a calculated variable is the result of the formula
+            # applied to the nudged inputs. This ensures perfect synchronicity.
+            sync_nudge = float(calculated_nudges.get(name, final_target))
             
             # 1. Clamping to absolute limits
             def_min, def_max = cfg.get('default_min', -9999), cfg.get('default_max', 9999)
-            target_val = max(def_min, min(def_max, target_val))
+            final_target = max(def_min, min(def_max, final_target))
+            sync_nudge = max(def_min, min(def_max, sync_nudge))
             
-            # 2. Industrial Nudge Calculation (Centralized utility)
-            gain = abs(float(cfg.get('nudge_speed', default_step_fraction))) # Treated as gain (0.0-1.0)
-            
-            nudged_target = apply_industrial_nudge(
-                curr_val, target_val, gain, def_min, def_max
-            )
-            
-            if abs(nudged_target - target_val) < 0.001:
+            # 2. Safety Check: If the user explicitly defined a nudge_speed for the CALC variable,
+            # we respect it as a secondary damper, but usually it should be 1.0 (fully synchronous).
+            gain = abs(float(cfg.get('nudge_speed', 1.0))) 
+            if gain < 0.99:
+                # Apply secondary damping if configured
+                nudged_target = apply_industrial_nudge(curr_val, sync_nudge, gain, def_min, def_max)
+            else:
+                nudged_target = sync_nudge
+
+            if abs(nudged_target - final_target) < 0.001:
                 reason = "Calculated (Synced)"
             else:
-                reason = "Calculated (Nudge Applied)"
+                reason = "Calculated (Nudging)"
 
             new_actions.append({
                 "var_name": name, 
                 "current_setpoint": curr_val,
-                "fingerprint_set_point": target_val, # Final absolute target
-                "nudge_target": nudged_target,      # Safe absolute step
-                "final_target": target_val,
+                "fingerprint_set_point": final_target, # Final absolute target
+                "nudge_target": nudged_target,         # Safe synchronous step
+                "final_target": final_target,
                 "diff": nudged_target - curr_val,
                 "reason": reason, 
                 "type": "Control", 

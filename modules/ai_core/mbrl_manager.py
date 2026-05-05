@@ -483,6 +483,25 @@ def get_optimal_action(current_real_df):
             "reason": reason
         })
 
+    # 2. GENERATE CALCULATED ACTIONS (derived variables)
+    # Ensuring the AI mode also respects formula-driven dependencies
+    calc_vars_cfg = full_config.get('calculated_variables', {})
+    indicators_cfg = process_model.get_indicator_variables()
+    
+    # We use map_tags_to_friendly_names logic here to ensure current_state is clean
+    current_state_map = latest_vals.to_dict()
+    mapped_state = {process_model.get_tag_to_name_map().get(k, k): v for k, v in current_state_map.items()}
+
+    calc_actions = process_model.generate_calculated_actions(
+        ui_actions, mapped_state, controls_cfg, indicators_cfg, calc_vars_cfg
+    )
+    
+    # Merge calculated actions into the final list
+    calc_names = {c['var_name'] for c in calc_actions}
+    ui_actions = [a for a in ui_actions if a.get('var_name') not in calc_names]
+    ui_actions.extend(calc_actions)
+
+
     return {
         "match_score": "SAC-MBRL" if SAC_AVAILABLE else "AI-ASSIST",
         "confidence": val_confidence,
