@@ -198,7 +198,15 @@ def predict_soft_sensor_rollout(current_real_df, pred_var_name, steps=60):
     a_cols = _env_config['a_cols']
 
     for c in s_cols + a_cols:
-        if c not in current_real_df.columns: current_real_df[c] = 0.0
+        if c not in current_real_df.columns:
+            v_type = 'state' if c in s_cols else 'action'
+            stats = _env_config['stats'][v_type]
+            try:
+                col_idx = (s_cols if c in s_cols else a_cols).index(c)
+                neutral = float(stats['min'][col_idx]) + 0.5 * float(stats['range'][col_idx])
+            except (IndexError, KeyError, TypeError):
+                neutral = 0.0
+            current_real_df[c] = neutral
 
     if len(current_real_df) < HISTORY_WINDOW: return []
 
@@ -391,7 +399,19 @@ def get_optimal_action(current_real_df):
     controls_cfg = process_model.get_control_variables()
 
     for c in s_cols + a_cols:
-        if c not in current_real_df.columns: current_real_df[c] = 0.0
+        if c not in current_real_df.columns:
+            # Use the training data midpoint (min + 0.5*range) as the neutral fill value.
+            # Filling with raw 0.0 causes extreme negative normalized values for sensors
+            # whose training minimum is non-zero (e.g. motor speed min=1400 RPM → normalized=-17.5),
+            # which corrupts the entire SAC observation and causes 0% confidence.
+            v_type = 'state' if c in s_cols else 'action'
+            stats = _env_config['stats'][v_type]
+            try:
+                col_idx = (s_cols if c in s_cols else a_cols).index(c)
+                neutral = float(stats['min'][col_idx]) + 0.5 * float(stats['range'][col_idx])
+            except (IndexError, KeyError, TypeError):
+                neutral = 0.0
+            current_real_df[c] = neutral
 
     if len(current_real_df) < HISTORY_WINDOW:
         padding = pd.concat([current_real_df.iloc[[0]]] * (HISTORY_WINDOW - len(current_real_df)), ignore_index=True)
