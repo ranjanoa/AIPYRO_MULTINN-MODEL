@@ -3,6 +3,13 @@ import numpy as np
 import torch
 import os
 import sys
+if hasattr(sys.stdout, 'reconfigure'):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+        sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
+
 from datetime import datetime
 from torch.utils.data import DataLoader, Dataset, TensorDataset
 
