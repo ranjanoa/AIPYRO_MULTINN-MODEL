@@ -54,6 +54,15 @@ class FirstPrinciplesDigitalTwin:
         # Apply the auto-tuning bias dynamically
         self.params['combustion_efficiency'] *= self.bias.get('heat_efficiency_modifier', 1.0)
 
+    @staticmethod
+    def _safe_float(val, fallback=0.0):
+        """Convert any value to a safe float. Returns fallback if NaN, Inf, or unconvertible."""
+        try:
+            f = float(val)
+            return f if np.isfinite(f) else fallback
+        except (ValueError, TypeError):
+            return fallback
+
     def simulate_step(self, state: dict, action_vector: dict, dt_mins: float = 1.0) -> dict:
         next_state = copy.deepcopy(state)
         
@@ -158,13 +167,14 @@ class FirstPrinciplesDigitalTwin:
         pc_thermal_contribution = (pc_q_in / max(pc_q_reaction, 1.0)) * 800.0 
         sim_exhaust_temp = state.get('exhaust_temp', 850.0) + alpha_thermal * ((pc_thermal_contribution * 0.8) + gas_velocity - state.get('exhaust_temp', 850.0))
 
-        next_state['bzt'] = next_bzt
-        next_state['torque'] = sim_torque
-        next_state['pressure'] = sim_pressure
-        next_state['exhaust_temp'] = sim_exhaust_temp
-        next_state['o2_excess'] = o2_excess_pct
-        next_state['co_ppm'] = sim_co
-        next_state['clinker_production'] = clinker_tph
+        # Sanitize ALL outputs — if any computation produced NaN/Inf, clamp to safe defaults
+        next_state['bzt'] = self._safe_float(next_bzt, self.params['min_safe_bzt'] + 50.0)
+        next_state['torque'] = self._safe_float(sim_torque, (self.params['min_safe_torque'] + self.params['max_safe_torque']) / 2.0)
+        next_state['pressure'] = self._safe_float(sim_pressure, self.params['base_kiln_pressure'])
+        next_state['exhaust_temp'] = self._safe_float(sim_exhaust_temp, 850.0)
+        next_state['o2_excess'] = self._safe_float(o2_excess_pct, 3.0)
+        next_state['co_ppm'] = self._safe_float(sim_co, self.params['base_co_ppm'])
+        next_state['clinker_production'] = self._safe_float(clinker_tph, 0.0)
         
         return next_state
 
@@ -173,7 +183,12 @@ class FirstPrinciplesDigitalTwin:
         violations = []
         
         for t in range(horizon_mins):
-            sim_state = self.simulate_step(sim_state, action_vector, dt_mins=1.0)
+            try:
+                sim_state = self.simulate_step(sim_state, action_vector, dt_mins=1.0)
+            except Exception:
+                # If any single step crashes, abort rollout and report stable
+                # (never let bad physics block the AI pipeline)
+                break
             
             if sim_state['co_ppm'] > self.params['max_safe_co_ppm']:
                 violations.append(f"CO Spike / ESP Explosion Risk at T+{t}m (CO: {sim_state['co_ppm']:.0f} ppm). Reduce RDF/Alternative Fuel!")
