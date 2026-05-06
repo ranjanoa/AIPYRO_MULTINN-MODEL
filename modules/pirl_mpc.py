@@ -245,8 +245,13 @@ class PIRL_MPC_Controller:
             name = act['var_name']
             role = mapping.get(name)
             if role:
-                vec[role] = vec.get(role, 0.0) + act['final_target']
+                # Prefer nudge_target (the safe, throttled step value) over final_target (the raw NN goal).
+                # Using final_target can give extreme/zero values at the first cycle
+                # that collapse the physics simulation (e.g. feed=134 tph → zero simulated torque).
+                val = act.get('nudge_target') or act.get('final_target') or act.get('fingerprint_set_point', 0.0)
+                vec[role] = vec.get(role, 0.0) + float(val)
         return vec
+
 
     def _get_dynamic_fallback(self, config: dict, role: str) -> float:
         """Dynamically extracts a sensible baseline for a missing sensor using config boundaries."""
