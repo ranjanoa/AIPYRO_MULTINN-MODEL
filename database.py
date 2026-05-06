@@ -1,6 +1,7 @@
 # database.py - Updated for Pandas 3.0 & InfluxDB _time mapping
 import config
 import pandas as pd
+import numpy as np
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 
@@ -52,6 +53,13 @@ def _rename_and_format_df(df, tag_map):
         df = df.bfill().ffill()
     else:
         df = df.ffill().bfill()
+
+    # Sanitize subnormal floats from disconnected PLCs (e.g., 1e-39) to exactly 0.0
+    # This prevents the UI from rendering weird scientific notation characters (like â‚¬<39â‚¬<-)
+    # and prevents the AI from calculating infinite uncertainties.
+    numeric_cols = df.select_dtypes(include=[np.number]).columns
+    if not numeric_cols.empty:
+        df[numeric_cols] = df[numeric_cols].apply(lambda x: np.where(np.abs(x) < 1e-10, 0.0, x))
 
     df = df.reset_index()
 
