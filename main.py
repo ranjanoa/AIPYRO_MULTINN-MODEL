@@ -171,7 +171,7 @@ def index():
 @app.route('/favicon.ico')
 def favicon():
     """Serves the favicon from the root directory."""
-    return send_from_directory(os.getcwd(), 'logo.ico', mimetype='image/vnd.microsoft.icon')
+    return send_from_directory(config.APP_DIR, 'logo.ico', mimetype='image/vnd.microsoft.icon')
 
 
 # --- BACKGROUND TASK: Data Stream ---
