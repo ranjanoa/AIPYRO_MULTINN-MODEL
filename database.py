@@ -33,8 +33,10 @@ def _rename_and_format_df(df, tag_map):
     df = df.rename(columns=tag_map)
     df[config.TIMESTAMP_COLUMN] = pd.to_datetime(df[config.TIMESTAMP_COLUMN])
 
-    # Set index and sort before filtering
+    # Set index, sort, and merge exact duplicate timestamps from multiple tables before filtering
     df = df.set_index(config.TIMESTAMP_COLUMN).sort_index()
+    if df.index.duplicated().any():
+        df = df.groupby(level=0).first()
 
     # Apply configured signal filtering rules on RAW data BEFORE oversampling
     try:
@@ -47,9 +49,9 @@ def _rename_and_format_df(df, tag_map):
     df = df.resample(config.RESAMPLE_INTERVAL).first()
 
     if config.FILL_METHOD == 'bfill':
-        df = df.bfill()
+        df = df.bfill().ffill()
     else:
-        df = df.ffill()
+        df = df.ffill().bfill()
 
     df = df.reset_index()
 
