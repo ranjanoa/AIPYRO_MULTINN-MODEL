@@ -574,22 +574,32 @@ def automated_control_loop():
                                 
                                 else:
                                     try:
-                                        fp_score = float(recommendation.get('match_score', 0))
+                                        # In NN mode, recommendation.match_score is "SAC-MBRL" (a string).
+                                        # Use the outer fp_rec (fingerprint engine score) as the ground-truth
+                                        # similarity score so trust revocation reflects real plant state.
+                                        raw_ms = recommendation.get('match_score', 0)
+                                        fp_score = float(raw_ms) if isinstance(raw_ms, (int, float)) else float(fp_rec.get('match_score', 0)) if fp_rec and isinstance(fp_rec.get('match_score'), (int, float)) else 0.0
                                     except (ValueError, TypeError):
                                         fp_score = 0.0
                                         
-                                    nn_score = float(recommendation.get('confidence', 0))
+                                    nn_score = float(recommendation.get('confidence', 0) or 0)
                                     
                                     fp_limit = trust_thresholds.get('fingerprint', 85.0)
                                     ai_limit = trust_thresholds.get('ai', 80.0)
 
                                     if strategy == "FINGERPRINT":
                                         if fp_score >= fp_limit: instant_trust = 1
-                                    elif strategy == "AI":
-                                        if nn_score >= ai_limit: instant_trust = 1
+                                    elif strategy in ("AI", "SAC-MBRL", "AI-ASSIST"):  # NN mode
+                                        # In NN mode: trust if fingerprint is high (grounding signal)
+                                        # OR if NN confidence itself is high enough
+                                        if fp_score >= fp_limit or nn_score >= ai_limit:
+                                            instant_trust = 1
                                     elif strategy == "HYBRID":
                                         if fp_score >= fp_limit or nn_score >= ai_limit:
                                             instant_trust = 1
+                                    else:
+                                        # Fallback for any unrecognised strategy: trust on fingerprint
+                                        if fp_score >= fp_limit: instant_trust = 1
 
                                 # 2. Apply Persistence Timer (Debounce)
                                 persistence_limit = trust_cfg.get('persistence_sec', 60)
