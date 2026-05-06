@@ -33,7 +33,8 @@ LITERATURE_DEFAULTS = {
     'min_safe_torque': 100.0, 'max_safe_torque': 350.0,
     'min_o2_excess': 1.2, 'max_safe_pressure': -0.5,
     'max_exhaust_temp': 1050.0, 'max_safe_co_ppm': 800.0,
-    'correction_factor': 0.5
+    'correction_factor': 0.5,
+    'bz_residence_time_mins': 20.0  # Burning zone material residence time (mins). Typical: 15-30 min.
 }
 
 
@@ -96,7 +97,11 @@ class FirstPrinciplesDigitalTwin:
         rdf_kg_min = (eff_rdf * 1000) / 60.0
         
         total_fuel_kg_min = pc_fuel_kg_min + kiln_fuel_kg_min
-        mass_in_bz_kg = (clinker_tph * 1000) / max(speed_rpm, 0.5) 
+        
+        # Mass in burning zone: feed_rate (kg/min) × residence_time (mins).
+        # This is the standard cement kiln engineering formula and removes any
+        # dependency on kiln motor speed RPM (which may be unavailable).
+        mass_in_bz_kg = clinker_kg_min * self.params['bz_residence_time_mins']
 
         # Stoichiometry & Air Balance 
         required_air_kg_min = (total_fuel_kg_min * self.params['stoichiometric_air_ratio']) + (rdf_kg_min * self.params['rdf_air_ratio'])
