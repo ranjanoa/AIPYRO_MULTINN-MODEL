@@ -38,7 +38,7 @@ export function updateHybridDashboard(data) {
         // --- 3. DUAL-SCORE MAPPING (FP/NN MINI-INDICATORS) ---
         // Priority: data.fp_score/ai_score (new) -> fallback to older paths
         const fpScore = Math.round(data.fp_score !== undefined ? data.fp_score : (data.match_meta?.similarity_score || data.match_score || 0));
-        const nnScore = Math.round(data.ai_score !== undefined ? data.ai_score : (data.soft_sensors?.sac_confidence_score || data.confidence || 0));
+        const nnScore = Math.round(data.ai_score !== undefined ? data.ai_score : (data.soft_sensors?.ai_confidence || data.soft_sensors?.sac_confidence_score || data.confidence || 0));
 
         // Update Mini indicators (always visible in Hybrid card)
         const miniFp = document.getElementById('mini-fp-score');

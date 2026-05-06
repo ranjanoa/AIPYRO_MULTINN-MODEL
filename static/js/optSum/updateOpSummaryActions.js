@@ -16,7 +16,7 @@ export function updateOpSummaryActions(data) {
                         msg += ` <span class="text-gray-600">|</span> <span class="text-orange-300 text-[10px]">${data.upset_summary.join(' | ')}</span>`;
                     }
                 } else if (data.active_strategy === "AI") {
-                    const conf = data.soft_sensors?.sac_confidence_score || data.confidence || 0;
+                    const conf = data.soft_sensors?.ai_confidence || data.soft_sensors?.sac_confidence_score || data.confidence || 0;
                     msg = `<span class="text-ai-cyan">[${timeStr}] AI: Optimization active (Conf: ${Math.round(conf)}%)</span>`;
                     if (data.actions && data.actions.length > 0) {
                         msg += ` <span class="text-gray-600">|</span> <span class="text-[10px] text-gray-300">Targeting: ${data.actions[0].var_name} &rarr; ${parseFloat(data.actions[0].fingerprint_set_point).toFixed(2)}</span>`;

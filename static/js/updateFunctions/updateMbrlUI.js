@@ -40,8 +40,8 @@ export function updateMbrlUI(data) {
         let match = parseFloat(data.match_score);
         if (!isNaN(match) && match > 0) {
             finalScore = match;
-        } else if (data.soft_sensors && data.soft_sensors.sac_confidence_score) {
-            finalScore = data.soft_sensors.sac_confidence_score;
+        } else if (data.soft_sensors && (data.soft_sensors.ai_confidence !== undefined || data.soft_sensors.sac_confidence_score !== undefined)) {
+            finalScore = data.soft_sensors.ai_confidence !== undefined ? data.soft_sensors.ai_confidence : data.soft_sensors.sac_confidence_score;
         } else if (data.confidence) {
             finalScore = data.confidence;
         }

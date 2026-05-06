@@ -13,7 +13,7 @@ export function updateOpSummaryActionsKiln(data) {
                 if (data.match_score === "SAFETY-CLAMP") {
                     msg = `<span class="text-red-500 font-bold">[${timeStr}] GUARDIAN: Safety limit breached. Clamping output.</span>`;
                 } else if (data.active_strategy === "AI") {
-                    const conf = data.soft_sensors?.sac_confidence_score || data.confidence || 0;
+                    const conf = data.soft_sensors?.ai_confidence || data.soft_sensors?.sac_confidence_score || data.confidence || 0;
                     msg = `<span class="text-ai-cyan">[${timeStr}] AI: Optimization active (Conf: ${Math.round(conf)}%)</span>`;
                     if (data.actions && data.actions.length > 0) {
                         msg += ` <span class="text-gray-500">|</span> <span class="text-[10px] text-gray-300">Targeting: ${data.actions[0].var_name} &rarr; ${parseFloat(data.actions[0].fingerprint_set_point).toFixed(2)}</span>`;
