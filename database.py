@@ -106,6 +106,10 @@ def write_setpoints(timestamp, setpoints_dict, setpoint_tag_map, scale_factors):
     try:
         point = Point(config.DB_MEASUREMENT_SETPOINTS).time(timestamp)
         for name, value in setpoints_dict.items():
+            if name in ['AI_SYSTEM_TRUST', 'AI_SYSTEM_TRUST_STATUS', 'AI_CONTROL_SIGNAL']:
+                point.field(name, float(value))
+                continue
+                
             tag = setpoint_tag_map.get(name)
             if tag:
                 point.field(tag, float(value * scale_factors.get(name, 1)))
