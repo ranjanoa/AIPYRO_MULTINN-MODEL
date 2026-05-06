@@ -379,15 +379,26 @@ def automated_control_loop():
                         
                         ai_rec = None
                         if mbrl_manager and current_mode in (1, 3):
-                             ai_rec = mbrl_manager.get_optimal_action(real_df)
-                             
-                             # [PIRL-MPC] Intercept and correct AI actions via First-Principles Physics
-                             try:
-                                 from modules.pirl_mpc import engine as pirl_engine
-                                 if ai_rec:
-                                     ai_rec = pirl_engine.evaluate_and_correct(ai_rec, mapped_state)
-                             except Exception as _pe:
-                                 logger.warning(f"PIRL MPC Error (Continuing with raw AI): {_pe}")
+                            try:
+                                import concurrent.futures
+                                with concurrent.futures.ThreadPoolExecutor(max_workers=1) as _nn_executor:
+                                    _nn_future = _nn_executor.submit(mbrl_manager.get_optimal_action, real_df.copy())
+                                    try:
+                                        ai_rec = _nn_future.result(timeout=25)
+                                    except concurrent.futures.TimeoutError:
+                                        logger.error("[NN-TIMEOUT] get_optimal_action exceeded 25s. Skipping NN cycle to keep app responsive.")
+                                        ai_rec = None
+                            except Exception as _nn_err:
+                                logger.error(f"[NN-ERROR] get_optimal_action failed: {_nn_err}")
+                                ai_rec = None
+
+                            # [PIRL-MPC] Intercept and correct AI actions via First-Principles Physics
+                            if ai_rec:
+                                try:
+                                    from modules.pirl_mpc import engine as pirl_engine
+                                    ai_rec = pirl_engine.evaluate_and_correct(ai_rec, mapped_state)
+                                except Exception as _pe:
+                                    logger.warning(f"PIRL MPC Error (Continuing with raw AI): {_pe}")
                         
                         ai_score = float(ai_rec.get('confidence', 0)) if ai_rec and ai_rec.get('confidence') is not None else 0
 

@@ -229,6 +229,11 @@ def predict_soft_sensor_rollout(current_real_df, pred_var_name, steps=60):
         delta = mean_delta.cpu().numpy()[0]
         next_norm_state = current_norm_state + delta
 
+        # Early-exit guard: if the state has exploded (NaN/Inf from a bad NN cycle),
+        # stop the rollout immediately to prevent blocking the background thread.
+        if not np.isfinite(next_norm_state).all():
+            break
+
         val_norm = next_norm_state[target_idx]
         val_real = (val_norm * _env_config['stats']['state']['range'][target_idx]) + \
                    _env_config['stats']['state']['min'][target_idx]
