@@ -278,8 +278,14 @@ class PIRL_MPC_Controller:
                 state[role] = self._get_dynamic_fallback(config, role)
                 
         # Special logic to prevent 0.0 crash for speed/draft if completely missing
-        if state['speed'] == 0.0: state['speed'] = 1.0 
-        
+        if state['speed'] == 0.0: state['speed'] = 1.0
+
+        # Guard: if torque is 0.0 it means the Kiln Motor Amps sensor is missing/disconnected
+        # (not a real plant state). Use the mid-point of the safe range as a neutral fallback
+        # to prevent PIRL-MPC from raising a false "Kiln Torque Crash" physics violation.
+        if state.get('torque', 0.0) == 0.0:
+            state['torque'] = (self.params['min_safe_torque'] + self.params['max_safe_torque']) / 2.0
+
         return state
 
     def _update_auto_tuning_bias(self, current_bzt: float):

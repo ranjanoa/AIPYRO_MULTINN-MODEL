@@ -436,7 +436,11 @@ def get_optimal_action(current_real_df):
         if np.isnan(raw_var) or np.isinf(raw_var):
             val_confidence = 0.0
         else:
-            val_confidence = max(0, min(100, 100 - (raw_var * 1000)))
+            # Adaptive scaling: map variance to 0-100% confidence.
+            # raw_var is typically in the range 0.0 to ~2.0 for a well-trained model.
+            # We use a soft exponential decay so moderate variance still gives a meaningful score.
+            # Previously 100 - (raw_var * 1000) which collapsed to 0 for any var > 0.1.
+            val_confidence = max(0.0, min(100.0, 100.0 * np.exp(-raw_var * 5.0)))
             
         pred_temps = predict_soft_sensor_rollout(current_real_df, target_var_name, steps=15)
         val_prediction = pred_temps[-1] if pred_temps else 0.0
