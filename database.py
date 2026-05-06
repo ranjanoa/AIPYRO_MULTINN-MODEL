@@ -46,8 +46,18 @@ def _rename_and_format_df(df, tag_map):
     except Exception as e:
         print(f"Error applying signal filters: {e}")
 
-    # 5. Resample and Fill (Pandas 3.0 Syntax: No 'method' in fillna)
-    df = df.resample(config.RESAMPLE_INTERVAL).first()
+    # 5. Resample and Fill:
+    # Use mean() for numeric columns to preserve high-frequency signal fidelity without 'flattening',
+    # and use first() for categorical/string columns (like 'Coal Mill (ON/OFF)') to prevent dropping them.
+    resampled = df.resample(config.RESAMPLE_INTERVAL)
+    numeric_df = resampled.mean(numeric_only=True)
+    non_numeric_cols = df.select_dtypes(exclude=[np.number]).columns
+    
+    if not non_numeric_cols.empty:
+        non_numeric_df = resampled.first()[non_numeric_cols]
+        df = pd.concat([numeric_df, non_numeric_df], axis=1)
+    else:
+        df = numeric_df
 
     if config.FILL_METHOD == 'bfill':
         df = df.bfill().ffill()
