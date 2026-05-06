@@ -2474,5 +2474,8 @@
       }
     }
   },
+  "pirl_mpc_config": {
+    "enabled": false
+  },
   "version": "22.0"
 }
