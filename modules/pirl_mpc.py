@@ -209,7 +209,10 @@ class FirstPrinciplesDigitalTwin:
 
 class PIRL_MPC_Controller:
     def __init__(self):
-        self.enabled = True
+        # Disabled by default: the physics model parameters need calibration
+        # against actual plant data before it can safely evaluate NN recommendations.
+        # Enable via model_config.json pirl_mpc_config.enabled = true once calibrated.
+        self.enabled = False
         self._role_mapping_cache = {}
         self._bias_cache = {'heat_efficiency_modifier': 1.0}
         self._last_simulated_bzt = None
@@ -306,6 +309,14 @@ class PIRL_MPC_Controller:
             self._bias_cache['heat_efficiency_modifier'] = max(0.75, min(1.25, new_modifier))
 
     def evaluate_and_correct(self, ai_recommendation: dict, current_data: dict) -> dict:
+        # Check config flag first to allow field-toggling without redeployment
+        try:
+            import process_model as _pm
+            _cfg = _pm.load_model_config()
+            self.enabled = bool(_cfg.get('pirl_mpc_config', {}).get('enabled', False))
+        except Exception:
+            pass
+
         if not self.enabled or not ai_recommendation or not ai_recommendation.get('actions'):
             return ai_recommendation
             
