@@ -74,7 +74,7 @@ export function initSocket() {
 
     try {
         socket = io(MOCK_CONFIG.API_URL, {
-            transports: ['polling', 'websocket'],
+            transports: ['websocket', 'polling'],
             reconnection: true,
             reconnectionAttempts: Infinity,
             reconnectionDelay: 2000,

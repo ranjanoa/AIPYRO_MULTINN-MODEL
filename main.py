@@ -104,7 +104,11 @@ static_dir = os.path.join(config.BASE_DIR, 'static')
 
 app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 app.config.from_object('config')
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
+socketio = SocketIO(app, 
+                    cors_allowed_origins="*", 
+                    async_mode='eventlet',
+                    ping_timeout=60,
+                    ping_interval=25)
 
 
 # Note: We use config.CONTROL_MODE instead of a local variable now.
