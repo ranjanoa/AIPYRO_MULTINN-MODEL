@@ -461,23 +461,31 @@ def get_optimal_action(current_real_df):
         if np.isnan(raw_var) or np.isinf(raw_var):
             val_confidence = 0.0
         else:
-            # Adaptive scaling: map variance to 0-100% confidence.
-            # raw_var is typically in the range 0.0 to ~2.0 for a well-trained model.
-            # We use a soft exponential decay so moderate variance still gives a meaningful score.
-            # Previously 100 - (raw_var * 1000) which collapsed to 0 for any var > 0.1.
             val_confidence = max(0.0, min(100.0, 100.0 * np.exp(-raw_var * 5.0)))
             
+        # PROJECT PRIMARY TARGET
         pred_temps = predict_soft_sensor_rollout(current_real_df, target_var_name, steps=15)
         val_prediction = pred_temps[-1] if pred_temps else 0.0
-
         if np.isnan(val_prediction) or np.isinf(val_prediction): val_prediction = 0.0
+
+    # GENERATE FULL ROLLOUTS FOR ALL VARIABLES (FOR THE UI CHART)
+    # This enables the "Dynamic Predictive Chart" in AI mode
+    ai_rollouts = {}
+    if _world_model is not None:
+        # We project the top variables for the UI to ensure smoothness
+        # including all controls and primary indicators
+        ui_vars = list(a_cols) + [target_var_name]
+        for v in ui_vars:
+            if v:
+                rollout = predict_soft_sensor_rollout(current_real_df, v, steps=15)
+                if rollout:
+                    ai_rollouts[v] = [float(x) for x in rollout]
 
     soft_sensors = {}
     soft_sensors[out_keys['confidence']] = val_confidence
     soft_sensors[out_keys['prediction']] = val_prediction
     for tag, val in raw_ai_targets.items():
         key_name = f"sac_rec_{tag}"
-        # Guard against API crash
         if np.isnan(val) or np.isinf(val): val = 0.0
         soft_sensors[key_name] = val
 
@@ -544,7 +552,8 @@ def get_optimal_action(current_real_df):
         "timestamp": str(datetime.now()),
         "actions": ui_actions,
         "debug_message": "Policy Active (Ramping)",
-        "soft_sensors": soft_sensors
+        "soft_sensors": soft_sensors,
+        "fingerprint_prediction": ai_rollouts
     }
 
 
