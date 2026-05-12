@@ -12,247 +12,247 @@
   },
   "ai_mnm": {
     "cv_parameters": {
-      "main_firing_petcoke": {
-        "label": "Main firing pertcoke",
-        "unit": "TPH",
-        "curr_field": "main_firing_petcoke_real",
-        "sp_field": "main_firing_petcoke_AI_optimised",
-        "target_var": "Petcoke (Kiln)",
-        "default_min": 0,
-        "default_max": 8.5,
-        "priority": 1,
-        "nudge_speed": 0.05,
-        "position": 1
-      },
-      "main_firing_rdf": {
-        "label": "Main firing rdf",
-        "unit": "TPH",
-        "curr_field": "main_firing_rdf_real",
-        "sp_field": "main_firing_rdf_AI_optimised",
-        "target_var": "RDF (Kiln)",
-        "default_min": 0,
-        "default_max": 7,
-        "priority": 1,
-        "nudge_speed": 0.05,
-        "position": 2
-      },
-      "precalciner_petcoke": {
-        "label": "PC firing petcoke",
-        "unit": "TPH",
-        "curr_field": "precalciner_petcoke_real",
-        "sp_field": "precalciner_petcoke_AI_optimised",
-        "target_var": "Petcoke (PC)",
-        "default_min": 0,
-        "default_max": 12,
-        "priority": 1,
-        "nudge_speed": 0.05,
-        "position": 3
-      },
-      "precalciner_rdf1": {
-        "label": "PC firing rdf1",
-        "unit": "TPH",
-        "curr_field": "precalciner_rdf1_real",
-        "sp_field": "precalciner_rdf1_AI_optimised",
-        "target_var": "RDF 1 (PC)",
-        "default_min": 0,
-        "default_max": 9,
-        "priority": 1,
-        "nudge_speed": 0.05,
-        "position": 4
-      },
-      "precalciner_rdf2": {
-        "label": "PC firing rdf2",
-        "unit": "TPH",
-        "curr_field": "precalciner_rdf2_real",
-        "sp_field": "precalciner_rdf2_AI_optimised",
-        "target_var": "RDF 2 (PC)",
-        "default_min": 0,
-        "default_max": 9,
-        "priority": 1,
-        "nudge_speed": 0.05,
-        "position": 5
-      },
       "kiln_feed": {
-        "label": "Total KIln feed",
-        "unit": "TPH",
         "curr_field": "kiln_feed_real",
+        "default_max": 300,
+        "default_min": 200,
+        "label": "Total KIln feed",
+        "nudge_speed": 0.1,
+        "position": 6,
+        "priority": 1,
         "sp_field": "kiln_feed_optimized",
         "target_var": "Kiln feed",
-        "default_min": 200,
-        "default_max": 300,
+        "unit": "TPH"
+      },
+      "main_firing_petcoke": {
+        "curr_field": "main_firing_petcoke_real",
+        "default_max": 8.5,
+        "default_min": 0,
+        "label": "Main firing pertcoke",
+        "nudge_speed": 0.05,
+        "position": 1,
         "priority": 1,
-        "nudge_speed": 0.1,
-        "position": 6
+        "sp_field": "main_firing_petcoke_AI_optimised",
+        "target_var": "Petcoke (Kiln)",
+        "unit": "TPH"
+      },
+      "main_firing_rdf": {
+        "curr_field": "main_firing_rdf_real",
+        "default_max": 7,
+        "default_min": 0,
+        "label": "Main firing rdf",
+        "nudge_speed": 0.05,
+        "position": 2,
+        "priority": 1,
+        "sp_field": "main_firing_rdf_AI_optimised",
+        "target_var": "RDF (Kiln)",
+        "unit": "TPH"
+      },
+      "precalciner_petcoke": {
+        "curr_field": "precalciner_petcoke_real",
+        "default_max": 12,
+        "default_min": 0,
+        "label": "PC firing petcoke",
+        "nudge_speed": 0.05,
+        "position": 3,
+        "priority": 1,
+        "sp_field": "precalciner_petcoke_AI_optimised",
+        "target_var": "Petcoke (PC)",
+        "unit": "TPH"
+      },
+      "precalciner_rdf1": {
+        "curr_field": "precalciner_rdf1_real",
+        "default_max": 9,
+        "default_min": 0,
+        "label": "PC firing rdf1",
+        "nudge_speed": 0.05,
+        "position": 4,
+        "priority": 1,
+        "sp_field": "precalciner_rdf1_AI_optimised",
+        "target_var": "RDF 1 (PC)",
+        "unit": "TPH"
+      },
+      "precalciner_rdf2": {
+        "curr_field": "precalciner_rdf2_real",
+        "default_max": 9,
+        "default_min": 0,
+        "label": "PC firing rdf2",
+        "nudge_speed": 0.05,
+        "position": 5,
+        "priority": 1,
+        "sp_field": "precalciner_rdf2_AI_optimised",
+        "target_var": "RDF 2 (PC)",
+        "unit": "TPH"
       }
     },
     "indicator_parameters": {
-      "O2 (Kiln)": {
-        "label": "O2 (Kiln)",
-        "unit": "%",
-        "field": "O2 (Kiln)",
-        "default_min": 0,
-        "default_max": 100,
-        "position": 1
-      },
-      "CO (kiln)": {
-        "label": "CO (kiln)",
-        "unit": "ppm",
-        "field": "CO (kiln)",
-        "default_min": 0,
-        "default_max": 100,
-        "position": 2
-      },
-      "NOx (Kiln)": {
-        "label": "NOx (Kiln)",
-        "unit": "ppm",
-        "field": "NOx (Kiln)",
-        "default_min": 0,
-        "default_max": 100,
-        "position": 3
-      },
-      "Kiln motor 1 Amps": {
-        "label": "Kiln motor 1 Amps",
-        "unit": "A",
-        "field": "Kiln motor 1 Amps",
-        "default_min": 0,
-        "default_max": 100,
-        "position": 4
-      },
-      "RIP (Kiln)": {
-        "label": "RIP (Kiln)",
-        "unit": "mbar",
-        "field": "RIP (Kiln)",
-        "default_min": 0,
-        "default_max": 100,
-        "position": 5
-      },
-      "Secondary air T2": {
-        "label": "Secondary air T2",
-        "unit": "°C",
-        "field": "Secondary air T2",
-        "default_min": 0,
-        "default_max": 100,
-        "position": 6
-      },
-      "RDF (Kiln)": {
-        "label": "RDF (Kiln)",
-        "unit": "TPH",
-        "field": "RDF (Kiln)",
-        "default_min": 0,
-        "default_max": 100,
-        "position": 7
-      },
-      "Kiln BZT1": {
-        "label": "Kiln BZT1",
-        "unit": "°C",
-        "field": "Kiln BZT1",
-        "default_min": 0,
-        "default_max": 100,
-        "position": 8
-      },
-      "Kiln BZT2": {
-        "label": "Kiln BZT2",
-        "unit": "°C",
-        "field": "Kiln BZT2",
-        "default_min": 0,
-        "default_max": 100,
-        "position": 9
-      },
-      "Kiln motor 1 speed": {
-        "label": "Kiln motor 1 speed",
-        "unit": "RPM",
-        "field": "Kiln motor 1 speed",
-        "default_min": 0,
-        "default_max": 100,
-        "position": 10
-      },
-      "Kiln feed": {
-        "label": "Kiln feed",
-        "unit": "TPH",
-        "field": "Kiln feed",
-        "default_min": 0,
-        "default_max": 100,
-        "position": 11
-      },
-      "Petcoke (Kiln)": {
-        "label": "Petcoke (Kiln)",
-        "unit": "TPH",
-        "field": "Petcoke (Kiln)",
-        "default_min": 0,
-        "default_max": 100,
-        "position": 12
-      },
       "C4N gas T": {
-        "label": "C4N gas T",
-        "unit": "°C",
-        "field": "C4N gas T",
-        "default_min": 0,
         "default_max": 100,
-        "position": 13
+        "default_min": 0,
+        "field": "C4N gas T",
+        "label": "C4N gas T",
+        "position": 13,
+        "unit": "\u00c2\u00b0C"
       },
       "C4P gas T": {
-        "label": "C4P gas T",
-        "unit": "°C",
+        "default_max": 100,
+        "default_min": 0,
         "field": "C4P gas T",
-        "default_min": 0,
-        "default_max": 100,
-        "position": 14
-      },
-      "PC outlet T1": {
-        "label": "PC outlet T1",
-        "unit": "°C",
-        "field": "PC outlet T1",
-        "default_min": 0,
-        "default_max": 100,
-        "position": 15
-      },
-      "PC outlet T2": {
-        "label": "PC outlet T2",
-        "unit": "°C",
-        "field": "PC outlet T2",
-        "default_min": 0,
-        "default_max": 100,
-        "position": 16
-      },
-      "O2 (C3)": {
-        "label": "O2 (C3)",
-        "unit": "%",
-        "field": "O2 (C3)",
-        "default_min": 0,
-        "default_max": 100,
-        "position": 17
+        "label": "C4P gas T",
+        "position": 14,
+        "unit": "\u00c2\u00b0C"
       },
       "CO (C3)": {
-        "label": "CO (C3)",
-        "unit": "ppm",
+        "default_max": 100,
+        "default_min": 0,
         "field": "CO (C3)",
-        "default_min": 0,
-        "default_max": 100,
-        "position": 18
+        "label": "CO (C3)",
+        "position": 18,
+        "unit": "ppm"
       },
-      "RDF 1 (PC)": {
-        "label": "RDF 1 (PC)",
-        "unit": "TPH",
-        "field": "RDF 1 (PC)",
-        "default_min": 0,
+      "CO (kiln)": {
         "default_max": 100,
-        "position": 19
+        "default_min": 0,
+        "field": "CO (kiln)",
+        "label": "CO (kiln)",
+        "position": 2,
+        "unit": "ppm"
       },
-      "RDF 2 (PC)": {
-        "label": "RDF 2 (PC)",
-        "unit": "TPH",
-        "field": "RDF 2 (PC)",
-        "default_min": 0,
+      "Kiln BZT1": {
         "default_max": 100,
-        "position": 20
+        "default_min": 0,
+        "field": "Kiln BZT1",
+        "label": "Kiln BZT1",
+        "position": 8,
+        "unit": "\u00c2\u00b0C"
+      },
+      "Kiln BZT2": {
+        "default_max": 100,
+        "default_min": 0,
+        "field": "Kiln BZT2",
+        "label": "Kiln BZT2",
+        "position": 9,
+        "unit": "\u00c2\u00b0C"
+      },
+      "Kiln feed": {
+        "default_max": 100,
+        "default_min": 0,
+        "field": "Kiln feed",
+        "label": "Kiln feed",
+        "position": 11,
+        "unit": "TPH"
+      },
+      "Kiln motor 1 Amps": {
+        "default_max": 100,
+        "default_min": 0,
+        "field": "Kiln motor 1 Amps",
+        "label": "Kiln motor 1 Amps",
+        "position": 4,
+        "unit": "A"
+      },
+      "Kiln motor 1 speed": {
+        "default_max": 100,
+        "default_min": 0,
+        "field": "Kiln motor 1 speed",
+        "label": "Kiln motor 1 speed",
+        "position": 10,
+        "unit": "RPM"
+      },
+      "NOx (Kiln)": {
+        "default_max": 100,
+        "default_min": 0,
+        "field": "NOx (Kiln)",
+        "label": "NOx (Kiln)",
+        "position": 3,
+        "unit": "ppm"
+      },
+      "O2 (C3)": {
+        "default_max": 100,
+        "default_min": 0,
+        "field": "O2 (C3)",
+        "label": "O2 (C3)",
+        "position": 17,
+        "unit": "%"
+      },
+      "O2 (Kiln)": {
+        "default_max": 100,
+        "default_min": 0,
+        "field": "O2 (Kiln)",
+        "label": "O2 (Kiln)",
+        "position": 1,
+        "unit": "%"
+      },
+      "PC outlet T1": {
+        "default_max": 100,
+        "default_min": 0,
+        "field": "PC outlet T1",
+        "label": "PC outlet T1",
+        "position": 15,
+        "unit": "\u00c2\u00b0C"
+      },
+      "PC outlet T2": {
+        "default_max": 100,
+        "default_min": 0,
+        "field": "PC outlet T2",
+        "label": "PC outlet T2",
+        "position": 16,
+        "unit": "\u00c2\u00b0C"
+      },
+      "Petcoke (Kiln)": {
+        "default_max": 100,
+        "default_min": 0,
+        "field": "Petcoke (Kiln)",
+        "label": "Petcoke (Kiln)",
+        "position": 12,
+        "unit": "TPH"
       },
       "Petcoke (PC)": {
-        "label": "Petcoke (PC)",
-        "unit": "TPH",
-        "field": "Petcoke (PC)",
-        "default_min": 0,
         "default_max": 100,
-        "position": 21
+        "default_min": 0,
+        "field": "Petcoke (PC)",
+        "label": "Petcoke (PC)",
+        "position": 21,
+        "unit": "TPH"
+      },
+      "RDF (Kiln)": {
+        "default_max": 100,
+        "default_min": 0,
+        "field": "RDF (Kiln)",
+        "label": "RDF (Kiln)",
+        "position": 7,
+        "unit": "TPH"
+      },
+      "RDF 1 (PC)": {
+        "default_max": 100,
+        "default_min": 0,
+        "field": "RDF 1 (PC)",
+        "label": "RDF 1 (PC)",
+        "position": 19,
+        "unit": "TPH"
+      },
+      "RDF 2 (PC)": {
+        "default_max": 100,
+        "default_min": 0,
+        "field": "RDF 2 (PC)",
+        "label": "RDF 2 (PC)",
+        "position": 20,
+        "unit": "TPH"
+      },
+      "RIP (Kiln)": {
+        "default_max": 100,
+        "default_min": 0,
+        "field": "RIP (Kiln)",
+        "label": "RIP (Kiln)",
+        "position": 5,
+        "unit": "mbar"
+      },
+      "Secondary air T2": {
+        "default_max": 100,
+        "default_min": 0,
+        "field": "Secondary air T2",
+        "label": "Secondary air T2",
+        "position": 6,
+        "unit": "\u00c2\u00b0C"
       }
     }
   },
@@ -2077,6 +2077,9 @@
       "RIP (Kiln)": 0.08
     }
   },
+  "pirl_mpc_config": {
+    "enabled": true
+  },
   "safety_rules": [
     {
       "action_type": "offset",
@@ -2170,8 +2173,11 @@
         }
       ],
       "weights": {
-        "Petcoke (Kiln)": -0.02,
-        "RDF (Kiln)": 0.05
+        "Petcoke (Kiln)": -0.05,
+        "Petcoke (PC)": -0.05,
+        "RDF (Kiln)": 0.05,
+        "RDF 1 (PC)": 0.05,
+        "RDF 2 (PC)": 0.05
       }
     },
     "SHC_MIN": {
@@ -2391,7 +2397,7 @@
     "thresholds": {
       "ai": 70,
       "fingerprint": 50,
-      "hybrid_bias": 20
+      "hybrid_bias": 1
     }
   },
   "upset_conditions": {
@@ -2709,9 +2715,6 @@
         ]
       }
     }
-  },
-  "pirl_mpc_config": {
-    "enabled": true
   },
   "version": "22.0"
 }
