@@ -224,6 +224,17 @@ def predict_soft_sensor_rollout(current_real_df, pred_var_name, steps=60):
     held_norm_action = norm_a[-1]
 
     predictions = []
+    
+    # CASE 1: Action Variables (Controls like Petcoke, Feed)
+    # The World Model doesn't "predict" actions, so we project the AI's intended nudge ramp.
+    if pred_var_name in a_cols:
+        target_val = current_real_df[pred_var_name].iloc[-1]
+        # In a real cycle, we would have the AI target here. 
+        # Since this is a generic rollout call, we just show the projected hold.
+        # But for the UI, we want to see the "path".
+        return [float(target_val)] * steps
+
+    # CASE 2: State Variables (Indicators like O2, Temperature)
     try:
         target_idx = s_cols.index(pred_var_name)
     except ValueError:
@@ -476,8 +487,27 @@ def get_optimal_action(current_real_df):
         # including all controls and primary indicators
         ui_vars = list(a_cols) + [target_var_name]
         for v in ui_vars:
-            if v:
-                rollout = predict_soft_sensor_rollout(current_real_df, v, steps=15)
+            if not v: continue
+            
+            if v in a_cols:
+                # For Controls: Show the path from current to the AI's NEW target
+                curr = float(current_real_df[v].iloc[-1])
+                # Find the target for this specific variable from the AI's recommendations
+                target = curr
+                for act in ui_actions:
+                    if act['var_name'] == v:
+                        target = float(act['fingerprint_set_point'])
+                        break
+                
+                # Generate a smooth 30-minute ramp path
+                ramp = []
+                for m in range(30):
+                    if m <= 10: ramp.append(curr + (target - curr) * (m / 10))
+                    else: ramp.append(target)
+                ai_rollouts[v] = ramp
+            else:
+                # For Indicators: Use the World Model to simulate the physics curve
+                rollout = predict_soft_sensor_rollout(current_real_df, v, steps=30)
                 if rollout:
                     ai_rollouts[v] = [float(x) for x in rollout]
 
