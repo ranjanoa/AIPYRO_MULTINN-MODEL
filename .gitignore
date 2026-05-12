@@ -1,0 +1,31 @@
+venv/
+.venv/
+tosend_app/venv_*/
+*.csv
+*.optimized
+*.bundle
+__pycache__/
+*.pyc
+*.parquet
+.env
+.idea/
+logs/
+files/logs/
+files/data/
+
+# Runtime state files
+files/json/engine_state.json
+files/json/system_state.json
+files/json/socket.json
+files/json/previous_Fingerprint.json
+
+OLD/
+*.xlsx
+* - Copy*.json
+* - NAME AND LIMITS OK.json
+*.bkp
+scratch/
+static_20260415.zip
+static_20260415/
+templates.zip
+benchmark_report.md

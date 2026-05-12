@@ -1,0 +1,39 @@
+name: Build PyInstaller Executable
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12' # Ensure this matches your local Python version
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+
+    - name: Build Executable
+      run: |
+        pyinstaller CimporApp.spec --noconfirm
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: CimporApp-Windows
+        path: dist/CimporApp.exe
