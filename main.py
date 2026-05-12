@@ -396,7 +396,7 @@ def automated_control_loop():
                         fp_score = float(fp_rec.get('match_score', 0)) if fp_rec and isinstance(fp_rec.get('match_score'), (int, float)) else 0
                         
                         ai_rec = None
-                        if mbrl_manager and current_mode in (1, 2, 3, 4):
+                        if mbrl_manager and current_mode in (1, 3, 4):
                             try:
                                 import concurrent.futures
                                 with concurrent.futures.ThreadPoolExecutor(max_workers=1) as _nn_executor:
@@ -441,17 +441,11 @@ def automated_control_loop():
                                 if recommendation:
                                     recommendation['driver'] = "HISTORY"
                         
-                        elif current_mode == 2:  # AI-NN ONLY
-                            if ai_rec:
-                                recommendation = ai_rec
-                                if recommendation:
-                                    recommendation['active_strategy'] = "AI"
-                                    recommendation['driver'] = "AI-NN"
-                            else:
-                                recommendation = fp_rec
-                                if recommendation:
-                                    recommendation['active_strategy'] = "FINGERPRINT"
-                                    recommendation['driver'] = "HISTORY-FALLBACK"
+                        elif current_mode == 2:  # FINGERPRINT ONLY
+                            recommendation = fp_rec
+                            if recommendation:
+                                recommendation['active_strategy'] = "FINGERPRINT"
+                                recommendation['driver'] = "HISTORY"
                         
                         elif current_mode == 1:  # AI ONLY
                             if ai_rec:
