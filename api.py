@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify, current_app
+from flask_socketio import emit
 from flask_cors import cross_origin
 from datetime import datetime, timedelta
 import pandas as pd
@@ -144,6 +145,16 @@ def toggle_autopilot():
                 msg = "Unknown Strategy"
 
         control_service.service.set_enabled(should_enable)
+        
+        # --- IMMEDIATE UI RESET ---
+        # Force the dashboard to clear stale AI/FP curves immediately on mode switch
+        emit('autopilot_recommendation', {
+            "active_strategy": "MANUAL" if not should_enable else strategy,
+            "driver": "SWITCHING...",
+            "actions": [],
+            "match_score": 0,
+            "fingerprint_prediction": {}
+        }, broadcast=True, namespace='/')
 
         if config.TEST_MODE:
             msg += " [TEST MODE ACTIVE]"
