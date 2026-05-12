@@ -534,7 +534,8 @@ def get_optimal_action(current_real_df):
     # 3. GENERATE FULL ROLLOUTS FOR ALL VARIABLES (FOR THE UI CHART)
     ai_rollouts = {}
     if _world_model is not None:
-        ui_vars = list(a_cols) + [target_var_name]
+        # Include Controls AND Indicators in the pre-calculated curves
+        ui_vars = list(a_cols) + list(s_cols)
         for v in ui_vars:
             if not v: continue
             if v in a_cols:
