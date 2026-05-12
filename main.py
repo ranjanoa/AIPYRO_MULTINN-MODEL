@@ -396,7 +396,7 @@ def automated_control_loop():
                         fp_score = float(fp_rec.get('match_score', 0)) if fp_rec and isinstance(fp_rec.get('match_score'), (int, float)) else 0
                         
                         ai_rec = None
-                        if mbrl_manager and current_mode in (1, 3):
+                        if mbrl_manager and current_mode in (1, 3, 4):
                             try:
                                 import concurrent.futures
                                 with concurrent.futures.ThreadPoolExecutor(max_workers=1) as _nn_executor:
