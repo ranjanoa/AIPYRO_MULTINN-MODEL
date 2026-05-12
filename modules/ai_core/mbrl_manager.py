@@ -496,7 +496,19 @@ def get_optimal_action(current_real_df):
 
         def_min = controls_cfg.get(tag, {}).get('default_min', -9999)
         def_max = controls_cfg.get(tag, {}).get('default_max', 9999)
-        ultimate_goal = max(def_min, min(def_max, ultimate_goal))
+        
+        # 5% SAFETY CAP (User Constraint): 
+        # Limits the AI's ultimate goal to within +/- 5% of the current value.
+        # This prevents aggressive "setpoint zeroing" and ensures smooth ramping.
+        max_deviation = abs(current_val) * 0.05
+        # Fallback for zero-crossings or low values (1% of total span)
+        if max_deviation < 0.01:
+            max_deviation = abs(def_max - def_min) * 0.01
+            
+        lo_limit = max(def_min, current_val - max_deviation)
+        hi_limit = min(def_max, current_val + max_deviation)
+        
+        ultimate_goal = max(lo_limit, min(hi_limit, ultimate_goal))
 
         # Industrial Nudge Calculation (Centralized utility)
         # ONLY apply nudge if variable is in the Control section. Otherwise, 100% Jump.

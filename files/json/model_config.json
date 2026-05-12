@@ -2711,7 +2711,7 @@
     }
   },
   "pirl_mpc_config": {
-    "enabled": false
+    "enabled": true
   },
   "version": "22.0"
 }
