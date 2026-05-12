@@ -433,22 +433,36 @@ def get_aimnm_values():
                     return cdr_keys_lower[cand]
             return None
 
+        # --- LIVE PLC FALLBACK ---
+        # If cimpor_data_result is missing Curr values, we fetch them from live kiln1
+        missing_cv_vars = [spec.get('target_var') for spec in cv_spec.values() if spec.get('target_var')]
+        live_kiln1 = database.get_kiln1_latest_fields(missing_cv_vars, window_minutes=10) or {}
+
         values = {}
         missing = []
         for param, spec in cv_spec.items():
             curr_field = spec.get('curr_field')
             sp_field   = spec.get('sp_field')
+            target_var = spec.get('target_var')
+
             row = {}
             curr_resolved = _resolve(curr_field)
             sp_resolved   = _resolve(sp_field)
+
+            # Try to get Curr from AI results first, fallback to Live PLC
             if curr_resolved:
                 row['curr'] = cdr[curr_resolved]
+            elif target_var in live_kiln1:
+                row['curr'] = live_kiln1[target_var]
             else:
                 missing.append(curr_field)
+
+            # SP only comes from AI results
             if sp_resolved:
                 row['sp'] = cdr[sp_resolved]
             else:
                 missing.append(sp_field)
+
             values[param] = row
 
         if missing:
