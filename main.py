@@ -447,6 +447,22 @@ def automated_control_loop():
                                 recommendation['active_strategy'] = "FINGERPRINT"
                                 recommendation['driver'] = "HISTORY"
                         
+                        elif current_mode == 3:  # HYBRID AUTO-ARBITRATION
+                            # Compare FP Score (with bias) vs AI Score
+                            bias = float(trust_thresholds.get('hybrid_bias', 5.0))
+                            if (fp_score + bias) >= ai_score:
+                                recommendation = fp_rec
+                                if recommendation:
+                                    recommendation['active_strategy'] = "HYBRID-FP"
+                                    recommendation['driver'] = "HISTORY"
+                            elif ai_rec:
+                                recommendation = ai_rec
+                                if recommendation:
+                                    recommendation['active_strategy'] = "HYBRID-AI"
+                                    recommendation['driver'] = "AI-NN"
+                            else:
+                                recommendation = fp_rec
+
                         elif current_mode == 1:  # AI ONLY
                             if ai_rec:
                                 recommendation = ai_rec
