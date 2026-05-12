@@ -12,247 +12,247 @@
   },
   "ai_mnm": {
     "cv_parameters": {
-      "kiln_feed": {
-        "curr_field": "kiln_feed_real",
-        "default_max": 300,
-        "default_min": 200,
-        "label": "Total KIln feed",
-        "nudge_speed": 0.1,
-        "position": 6,
-        "priority": 1,
-        "sp_field": "kiln_feed_optimized",
-        "target_var": "Kiln feed",
-        "unit": "TPH"
-      },
       "main_firing_petcoke": {
-        "curr_field": "main_firing_petcoke_real",
-        "default_max": 8.5,
-        "default_min": 0,
         "label": "Main firing pertcoke",
-        "nudge_speed": 0.05,
-        "position": 1,
-        "priority": 1,
+        "unit": "TPH",
+        "curr_field": "main_firing_petcoke_real",
         "sp_field": "main_firing_petcoke_AI_optimised",
         "target_var": "Petcoke (Kiln)",
-        "unit": "TPH"
+        "default_min": 0,
+        "default_max": 8.5,
+        "priority": 1,
+        "nudge_speed": 0.05,
+        "position": 1
       },
       "main_firing_rdf": {
-        "curr_field": "main_firing_rdf_real",
-        "default_max": 7,
-        "default_min": 0,
         "label": "Main firing rdf",
-        "nudge_speed": 0.05,
-        "position": 2,
-        "priority": 1,
+        "unit": "TPH",
+        "curr_field": "main_firing_rdf_real",
         "sp_field": "main_firing_rdf_AI_optimised",
         "target_var": "RDF (Kiln)",
-        "unit": "TPH"
+        "default_min": 0,
+        "default_max": 7,
+        "priority": 1,
+        "nudge_speed": 0.05,
+        "position": 2
       },
       "precalciner_petcoke": {
-        "curr_field": "precalciner_petcoke_real",
-        "default_max": 12,
-        "default_min": 0,
         "label": "PC firing petcoke",
-        "nudge_speed": 0.05,
-        "position": 3,
-        "priority": 1,
+        "unit": "TPH",
+        "curr_field": "precalciner_petcoke_real",
         "sp_field": "precalciner_petcoke_AI_optimised",
         "target_var": "Petcoke (PC)",
-        "unit": "TPH"
+        "default_min": 0,
+        "default_max": 12,
+        "priority": 1,
+        "nudge_speed": 0.05,
+        "position": 3
       },
       "precalciner_rdf1": {
-        "curr_field": "precalciner_rdf1_real",
-        "default_max": 9,
-        "default_min": 0,
         "label": "PC firing rdf1",
-        "nudge_speed": 0.05,
-        "position": 4,
-        "priority": 1,
+        "unit": "TPH",
+        "curr_field": "precalciner_rdf1_real",
         "sp_field": "precalciner_rdf1_AI_optimised",
         "target_var": "RDF 1 (PC)",
-        "unit": "TPH"
+        "default_min": 0,
+        "default_max": 9,
+        "priority": 1,
+        "nudge_speed": 0.05,
+        "position": 4
       },
       "precalciner_rdf2": {
-        "curr_field": "precalciner_rdf2_real",
-        "default_max": 9,
-        "default_min": 0,
         "label": "PC firing rdf2",
-        "nudge_speed": 0.05,
-        "position": 5,
-        "priority": 1,
+        "unit": "TPH",
+        "curr_field": "precalciner_rdf2_real",
         "sp_field": "precalciner_rdf2_AI_optimised",
         "target_var": "RDF 2 (PC)",
-        "unit": "TPH"
+        "default_min": 0,
+        "default_max": 9,
+        "priority": 1,
+        "nudge_speed": 0.05,
+        "position": 5
+      },
+      "kiln_feed": {
+        "label": "Total KIln feed",
+        "unit": "TPH",
+        "curr_field": "kiln_feed_real",
+        "sp_field": "kiln_feed_optimized",
+        "target_var": "Kiln feed",
+        "default_min": 200,
+        "default_max": 300,
+        "priority": 1,
+        "nudge_speed": 0.1,
+        "position": 6
       }
     },
     "indicator_parameters": {
-      "C4N gas T": {
-        "default_max": 100,
+      "O2 (Kiln)": {
+        "label": "O2 (Kiln)",
+        "unit": "%",
+        "field": "O2 (Kiln)",
         "default_min": 0,
-        "field": "C4N gas T",
-        "label": "C4N gas T",
-        "position": 13,
-        "unit": "\u00c2\u00b0C"
-      },
-      "C4P gas T": {
         "default_max": 100,
-        "default_min": 0,
-        "field": "C4P gas T",
-        "label": "C4P gas T",
-        "position": 14,
-        "unit": "\u00c2\u00b0C"
-      },
-      "CO (C3)": {
-        "default_max": 100,
-        "default_min": 0,
-        "field": "CO (C3)",
-        "label": "CO (C3)",
-        "position": 18,
-        "unit": "ppm"
+        "position": 1
       },
       "CO (kiln)": {
-        "default_max": 100,
-        "default_min": 0,
-        "field": "CO (kiln)",
         "label": "CO (kiln)",
-        "position": 2,
-        "unit": "ppm"
-      },
-      "Kiln BZT1": {
-        "default_max": 100,
+        "unit": "ppm",
+        "field": "CO (kiln)",
         "default_min": 0,
-        "field": "Kiln BZT1",
-        "label": "Kiln BZT1",
-        "position": 8,
-        "unit": "\u00c2\u00b0C"
-      },
-      "Kiln BZT2": {
         "default_max": 100,
-        "default_min": 0,
-        "field": "Kiln BZT2",
-        "label": "Kiln BZT2",
-        "position": 9,
-        "unit": "\u00c2\u00b0C"
-      },
-      "Kiln feed": {
-        "default_max": 100,
-        "default_min": 0,
-        "field": "Kiln feed",
-        "label": "Kiln feed",
-        "position": 11,
-        "unit": "TPH"
-      },
-      "Kiln motor 1 Amps": {
-        "default_max": 100,
-        "default_min": 0,
-        "field": "Kiln motor 1 Amps",
-        "label": "Kiln motor 1 Amps",
-        "position": 4,
-        "unit": "A"
-      },
-      "Kiln motor 1 speed": {
-        "default_max": 100,
-        "default_min": 0,
-        "field": "Kiln motor 1 speed",
-        "label": "Kiln motor 1 speed",
-        "position": 10,
-        "unit": "RPM"
+        "position": 2
       },
       "NOx (Kiln)": {
-        "default_max": 100,
-        "default_min": 0,
-        "field": "NOx (Kiln)",
         "label": "NOx (Kiln)",
-        "position": 3,
-        "unit": "ppm"
-      },
-      "O2 (C3)": {
-        "default_max": 100,
+        "unit": "ppm",
+        "field": "NOx (Kiln)",
         "default_min": 0,
-        "field": "O2 (C3)",
-        "label": "O2 (C3)",
-        "position": 17,
-        "unit": "%"
-      },
-      "O2 (Kiln)": {
         "default_max": 100,
-        "default_min": 0,
-        "field": "O2 (Kiln)",
-        "label": "O2 (Kiln)",
-        "position": 1,
-        "unit": "%"
+        "position": 3
       },
-      "PC outlet T1": {
-        "default_max": 100,
+      "Kiln motor 1 Amps": {
+        "label": "Kiln motor 1 Amps",
+        "unit": "A",
+        "field": "Kiln motor 1 Amps",
         "default_min": 0,
-        "field": "PC outlet T1",
-        "label": "PC outlet T1",
-        "position": 15,
-        "unit": "\u00c2\u00b0C"
-      },
-      "PC outlet T2": {
         "default_max": 100,
-        "default_min": 0,
-        "field": "PC outlet T2",
-        "label": "PC outlet T2",
-        "position": 16,
-        "unit": "\u00c2\u00b0C"
-      },
-      "Petcoke (Kiln)": {
-        "default_max": 100,
-        "default_min": 0,
-        "field": "Petcoke (Kiln)",
-        "label": "Petcoke (Kiln)",
-        "position": 12,
-        "unit": "TPH"
-      },
-      "Petcoke (PC)": {
-        "default_max": 100,
-        "default_min": 0,
-        "field": "Petcoke (PC)",
-        "label": "Petcoke (PC)",
-        "position": 21,
-        "unit": "TPH"
-      },
-      "RDF (Kiln)": {
-        "default_max": 100,
-        "default_min": 0,
-        "field": "RDF (Kiln)",
-        "label": "RDF (Kiln)",
-        "position": 7,
-        "unit": "TPH"
-      },
-      "RDF 1 (PC)": {
-        "default_max": 100,
-        "default_min": 0,
-        "field": "RDF 1 (PC)",
-        "label": "RDF 1 (PC)",
-        "position": 19,
-        "unit": "TPH"
-      },
-      "RDF 2 (PC)": {
-        "default_max": 100,
-        "default_min": 0,
-        "field": "RDF 2 (PC)",
-        "label": "RDF 2 (PC)",
-        "position": 20,
-        "unit": "TPH"
+        "position": 4
       },
       "RIP (Kiln)": {
-        "default_max": 100,
-        "default_min": 0,
-        "field": "RIP (Kiln)",
         "label": "RIP (Kiln)",
-        "position": 5,
-        "unit": "mbar"
+        "unit": "mbar",
+        "field": "RIP (Kiln)",
+        "default_min": 0,
+        "default_max": 100,
+        "position": 5
       },
       "Secondary air T2": {
-        "default_max": 100,
-        "default_min": 0,
-        "field": "Secondary air T2",
         "label": "Secondary air T2",
-        "position": 6,
-        "unit": "\u00c2\u00b0C"
+        "unit": "°C",
+        "field": "Secondary air T2",
+        "default_min": 0,
+        "default_max": 100,
+        "position": 6
+      },
+      "RDF (Kiln)": {
+        "label": "RDF (Kiln)",
+        "unit": "TPH",
+        "field": "RDF (Kiln)",
+        "default_min": 0,
+        "default_max": 100,
+        "position": 7
+      },
+      "Kiln BZT1": {
+        "label": "Kiln BZT1",
+        "unit": "°C",
+        "field": "Kiln BZT1",
+        "default_min": 0,
+        "default_max": 100,
+        "position": 8
+      },
+      "Kiln BZT2": {
+        "label": "Kiln BZT2",
+        "unit": "°C",
+        "field": "Kiln BZT2",
+        "default_min": 0,
+        "default_max": 100,
+        "position": 9
+      },
+      "Kiln motor 1 speed": {
+        "label": "Kiln motor 1 speed",
+        "unit": "RPM",
+        "field": "Kiln motor 1 speed",
+        "default_min": 0,
+        "default_max": 100,
+        "position": 10
+      },
+      "Kiln feed": {
+        "label": "Kiln feed",
+        "unit": "TPH",
+        "field": "Kiln feed",
+        "default_min": 0,
+        "default_max": 100,
+        "position": 11
+      },
+      "Petcoke (Kiln)": {
+        "label": "Petcoke (Kiln)",
+        "unit": "TPH",
+        "field": "Petcoke (Kiln)",
+        "default_min": 0,
+        "default_max": 100,
+        "position": 12
+      },
+      "C4N gas T": {
+        "label": "C4N gas T",
+        "unit": "°C",
+        "field": "C4N gas T",
+        "default_min": 0,
+        "default_max": 100,
+        "position": 13
+      },
+      "C4P gas T": {
+        "label": "C4P gas T",
+        "unit": "°C",
+        "field": "C4P gas T",
+        "default_min": 0,
+        "default_max": 100,
+        "position": 14
+      },
+      "PC outlet T1": {
+        "label": "PC outlet T1",
+        "unit": "°C",
+        "field": "PC outlet T1",
+        "default_min": 0,
+        "default_max": 100,
+        "position": 15
+      },
+      "PC outlet T2": {
+        "label": "PC outlet T2",
+        "unit": "°C",
+        "field": "PC outlet T2",
+        "default_min": 0,
+        "default_max": 100,
+        "position": 16
+      },
+      "O2 (C3)": {
+        "label": "O2 (C3)",
+        "unit": "%",
+        "field": "O2 (C3)",
+        "default_min": 0,
+        "default_max": 100,
+        "position": 17
+      },
+      "CO (C3)": {
+        "label": "CO (C3)",
+        "unit": "ppm",
+        "field": "CO (C3)",
+        "default_min": 0,
+        "default_max": 100,
+        "position": 18
+      },
+      "RDF 1 (PC)": {
+        "label": "RDF 1 (PC)",
+        "unit": "TPH",
+        "field": "RDF 1 (PC)",
+        "default_min": 0,
+        "default_max": 100,
+        "position": 19
+      },
+      "RDF 2 (PC)": {
+        "label": "RDF 2 (PC)",
+        "unit": "TPH",
+        "field": "RDF 2 (PC)",
+        "default_min": 0,
+        "default_max": 100,
+        "position": 20
+      },
+      "Petcoke (PC)": {
+        "label": "Petcoke (PC)",
+        "unit": "TPH",
+        "field": "Petcoke (PC)",
+        "default_min": 0,
+        "default_max": 100,
+        "position": 21
       }
     }
   },
@@ -303,23 +303,6 @@
     }
   },
   "control_variables": {
-    "Cooler BF fan motor speed": {
-      "aipc": true,
-      "default_max": 1500,
-      "default_min": 0,
-      "description": "Cooler BF fan speed",
-      "filtering": {
-        "ema_alpha": 0.1,
-        "enabled": true,
-        "median_window": 7
-      },
-      "is_setpoint": true,
-      "nudge_speed": 0.2,
-      "op_summary": true,
-      "priority": 4,
-      "tag_name": "Cooler BF fan motor speed",
-      "unit": "rpm"
-    },
     "Cooler speed (central 1)": {
       "aipc": true,
       "default_max": 20,
@@ -421,7 +404,7 @@
     "Kiln feed": {
       "aipc": true,
       "default_max": 300,
-      "default_min": 0,
+      "default_min": 200,
       "description": "Kiln feed",
       "filtering": {
         "ema_alpha": 0.2,
@@ -431,6 +414,7 @@
       "is_setpoint": true,
       "nudge_speed": 0.1,
       "op_summary": true,
+      "position": 6,
       "priority": 1,
       "tag_name": "Kiln feed",
       "unit": "t/h"
@@ -471,7 +455,7 @@
     },
     "Petcoke (Kiln)": {
       "aipc": true,
-      "default_max": 5,
+      "default_max": 8.5,
       "default_min": 0,
       "description": "Petcoke main burner",
       "filtering": {
@@ -480,15 +464,16 @@
         "median_window": 3
       },
       "is_setpoint": true,
-      "nudge_speed": 0.1,
+      "nudge_speed": 0.05,
       "op_summary": true,
-      "priority": 2,
+      "position": 1,
+      "priority": 1,
       "tag_name": "Petcoke (Kiln)",
       "unit": "t/h"
     },
     "Petcoke (PC)": {
       "aipc": true,
-      "default_max": 5.5,
+      "default_max": 12,
       "default_min": 0,
       "description": "Petcoke calciner",
       "filtering": {
@@ -497,9 +482,10 @@
         "median_window": 3
       },
       "is_setpoint": true,
-      "nudge_speed": 0.1,
+      "nudge_speed": 0.05,
       "op_summary": true,
-      "priority": 2,
+      "position": 3,
+      "priority": 1,
       "tag_name": "Petcoke (PC)",
       "unit": "t/h"
     },
@@ -540,7 +526,7 @@
     },
     "RDF (Kiln)": {
       "aipc": true,
-      "default_max": 5,
+      "default_max": 7,
       "default_min": 0,
       "description": "RDF main burner",
       "filtering": {
@@ -551,13 +537,14 @@
       "is_setpoint": true,
       "nudge_speed": 0.05,
       "op_summary": true,
-      "priority": 3,
+      "position": 2,
+      "priority": 1,
       "tag_name": "RDF (Kiln)",
       "unit": "t/h"
     },
     "RDF 1 (PC)": {
       "aipc": true,
-      "default_max": 10,
+      "default_max": 9,
       "default_min": 0,
       "description": "MV: RDF calciner",
       "filtering": {
@@ -566,15 +553,16 @@
         "median_window": 3
       },
       "is_setpoint": true,
-      "nudge_speed": 0.3,
+      "nudge_speed": 0.05,
       "op_summary": true,
-      "priority": 3,
+      "position": 4,
+      "priority": 1,
       "tag_name": "RDF 1 (PC)",
       "unit": "t/h"
     },
     "RDF 2 (PC)": {
       "aipc": true,
-      "default_max": 10,
+      "default_max": 9,
       "default_min": 0,
       "description": "MV: RDF calciner",
       "filtering": {
@@ -583,9 +571,10 @@
         "median_window": 3
       },
       "is_setpoint": true,
-      "nudge_speed": 0.3,
+      "nudge_speed": 0.05,
       "op_summary": true,
-      "priority": 3,
+      "position": 5,
+      "priority": 1,
       "tag_name": "RDF 2 (PC)",
       "unit": "t/h"
     },
@@ -710,18 +699,6 @@
       "priority": 5,
       "tag_name": "% TSR (total)"
     },
-    "AQC boiler (ON/OFF)": {
-      "default_max": 100,
-      "default_min": 0,
-      "filtering": {
-        "ema_alpha": 0.2,
-        "enabled": true,
-        "median_window": 3
-      },
-      "nudge_speed": 0.05,
-      "priority": 5,
-      "tag_name": "AQC boiler (ON/OFF)"
-    },
     "Bypass fan speed": {
       "default_max": 823.19,
       "default_min": 0,
@@ -821,7 +798,7 @@
       "tag_name": "C4N gas P"
     },
     "C4N gas T": {
-      "default_max": 935,
+      "default_max": 100,
       "default_min": 0,
       "filtering": {
         "ema_alpha": 0.2,
@@ -830,7 +807,7 @@
       },
       "nudge_speed": 0.05,
       "op_summary": true,
-      "position": 5,
+      "position": 13,
       "priority": 2,
       "tag_name": "C4N gas T"
     },
@@ -860,18 +837,6 @@
       "priority": 2,
       "tag_name": "C4N mat T1"
     },
-    "C4N mat T2": {
-      "default_max": 1296.68,
-      "default_min": 0,
-      "filtering": {
-        "ema_alpha": 0.2,
-        "enabled": true,
-        "median_window": 3
-      },
-      "nudge_speed": 0.05,
-      "priority": 2,
-      "tag_name": "C4N mat T2"
-    },
     "C4P gas P": {
       "default_max": 122.87,
       "default_min": -27.29,
@@ -885,8 +850,8 @@
       "tag_name": "C4P gas P"
     },
     "C4P gas T": {
-      "default_max": 930,
-      "default_min": -1,
+      "default_max": 100,
+      "default_min": 0,
       "filtering": {
         "ema_alpha": 0.2,
         "enabled": true,
@@ -894,7 +859,7 @@
       },
       "nudge_speed": 0.05,
       "op_summary": true,
-      "position": 6,
+      "position": 14,
       "priority": 2,
       "tag_name": "C4P gas T"
     },
@@ -924,20 +889,8 @@
       "priority": 2,
       "tag_name": "C4P mat T1"
     },
-    "C4P mat T2": {
-      "default_max": 1243.28,
-      "default_min": 0,
-      "filtering": {
-        "ema_alpha": 0.2,
-        "enabled": true,
-        "median_window": 3
-      },
-      "nudge_speed": 0.05,
-      "priority": 2,
-      "tag_name": "C4P mat T2"
-    },
     "CO (C3)": {
-      "default_max": 0.2,
+      "default_max": 100,
       "default_min": 0,
       "filtering": {
         "ema_alpha": 0.2,
@@ -946,12 +899,12 @@
       },
       "nudge_speed": 0.05,
       "op_summary": true,
-      "position": 9,
+      "position": 18,
       "priority": 2,
       "tag_name": "CO (C3)"
     },
     "CO (kiln)": {
-      "default_max": 2.17,
+      "default_max": 100,
       "default_min": 0,
       "filtering": {
         "ema_alpha": 0.2,
@@ -960,7 +913,7 @@
       },
       "nudge_speed": 0.05,
       "op_summary": true,
-      "position": 10,
+      "position": 2,
       "priority": 2,
       "tag_name": "CO (kiln)"
     },
@@ -1027,18 +980,6 @@
       "priority": 1,
       "tag_name": "Coal Mill (ON/OFF)"
     },
-    "Cooler BF fan speed": {
-      "default_max": 1493.59,
-      "default_min": 0,
-      "filtering": {
-        "ema_alpha": 0.2,
-        "enabled": true,
-        "median_window": 3
-      },
-      "nudge_speed": 0.05,
-      "priority": 2,
-      "tag_name": "Cooler BF fan speed"
-    },
     "Cooler crusher Amps": {
       "default_max": 266.69,
       "default_min": 0,
@@ -1101,21 +1042,6 @@
       "priority": 3,
       "tag_name": "Cooler grate P (chamber 4)"
     },
-    "Cooler grate pressure (avg)": {
-      "default_max": 72.49,
-      "default_min": 0,
-      "filtering": {
-        "ema_alpha": 0.2,
-        "enabled": false,
-        "median_window": 3
-      },
-      "is_calculated": true,
-      "nudge_speed": 0.05,
-      "op_summary": true,
-      "position": 1,
-      "priority": 5,
-      "unit": "mbar"
-    },
     "Dividing gate SP": {
       "default_max": 100,
       "default_min": 0,
@@ -1170,20 +1096,6 @@
       "priority": 2,
       "tag_name": "ID fan inlet T"
     },
-    "ID fan outlet P (P01)": {
-      "default_max": -6,
-      "default_min": 0,
-      "filtering": {
-        "ema_alpha": 0.2,
-        "enabled": true,
-        "median_window": 3
-      },
-      "nudge_speed": 0.05,
-      "op_summary": true,
-      "position": 14,
-      "priority": 2,
-      "tag_name": "ID fan outlet P (P01)"
-    },
     "ID fan speed SP": {
       "default_max": 980,
       "default_min": -2,
@@ -1233,7 +1145,7 @@
       "tag_name": "Kiln BF motor 2 speed"
     },
     "Kiln BZT1": {
-      "default_max": 1500,
+      "default_max": 100,
       "default_min": 0,
       "filtering": {
         "ema_alpha": 0.2,
@@ -1242,12 +1154,12 @@
       },
       "nudge_speed": 0.05,
       "op_summary": true,
-      "position": 18,
+      "position": 8,
       "priority": 3,
       "tag_name": "Kiln BZT1"
     },
     "Kiln BZT2": {
-      "default_max": 1500,
+      "default_max": 100,
       "default_min": 0,
       "filtering": {
         "ema_alpha": 0.2,
@@ -1256,8 +1168,22 @@
       },
       "nudge_speed": 0.05,
       "op_summary": false,
+      "position": 9,
       "priority": 3,
       "tag_name": "Kiln BZT2"
+    },
+    "Kiln feed": {
+      "default_max": 100,
+      "default_min": 0,
+      "filtering": {
+        "ema_alpha": 0.2,
+        "enabled": true,
+        "median_window": 3
+      },
+      "nudge_speed": 0.05,
+      "position": 11,
+      "priority": 2,
+      "tag_name": "Kiln feed"
     },
     "Kiln feed LSF": {
       "default_max": 116.93,
@@ -1283,63 +1209,22 @@
       "priority": 2,
       "tag_name": "Kiln feed SP"
     },
-    "Kiln feed elevator Amps": {
-      "default_max": 250,
-      "default_min": 0,
-      "filtering": {
-        "ema_alpha": 0.2,
-        "enabled": true,
-        "median_window": 3
-      },
-      "nudge_speed": 0.05,
-      "priority": 2,
-      "tag_name": "Kiln feed elevator Amps"
-    },
-    "Kiln filling degree": {
+    "Kiln motor 1 Amps": {
       "default_max": 100,
       "default_min": 0,
       "filtering": {
         "ema_alpha": 0.2,
-        "enabled": false,
-        "median_window": 3
-      },
-      "is_calculated": true,
-      "nudge_speed": 0.05,
-      "op_summary": true,
-      "position": 20,
-      "priority": 5,
-      "unit": "%"
-    },
-    "Kiln hood P": {
-      "default_max": -0.2,
-      "default_min": -0.7,
-      "filtering": {
-        "ema_alpha": 0.2,
         "enabled": true,
         "median_window": 3
       },
       "nudge_speed": 0.05,
       "op_summary": true,
-      "position": 17,
-      "priority": 5,
-      "tag_name": "Kiln hood P"
-    },
-    "Kiln motor 1 Amps": {
-      "default_max": 400,
-      "default_min": 0,
-      "filtering": {
-        "ema_alpha": 0.2,
-        "enabled": true,
-        "median_window": 3
-      },
-      "nudge_speed": 0.05,
-      "op_summary": true,
-      "position": 16,
+      "position": 4,
       "priority": 1,
       "tag_name": "Kiln motor 1 Amps"
     },
     "Kiln motor 1 speed": {
-      "default_max": 39030.69,
+      "default_max": 100,
       "default_min": 0,
       "filtering": {
         "ema_alpha": 0.2,
@@ -1347,44 +1232,9 @@
         "median_window": 3
       },
       "nudge_speed": 0.05,
+      "position": 10,
       "priority": 2,
       "tag_name": "Kiln motor 1 speed"
-    },
-    "Kiln motor 2 Amps": {
-      "default_max": 1000,
-      "default_min": 0,
-      "filtering": {
-        "ema_alpha": 0.2,
-        "enabled": true,
-        "median_window": 3
-      },
-      "nudge_speed": 0.05,
-      "priority": 3,
-      "tag_name": "Kiln motor 2 Amps"
-    },
-    "Kiln motor 2 speed": {
-      "default_max": 39030.69,
-      "default_min": 0,
-      "filtering": {
-        "ema_alpha": 0.2,
-        "enabled": true,
-        "median_window": 3
-      },
-      "nudge_speed": 0.05,
-      "priority": 2,
-      "tag_name": "Kiln motor 2 speed"
-    },
-    "Kiln speed SP": {
-      "default_max": 3.8,
-      "default_min": 3.4,
-      "filtering": {
-        "ema_alpha": 0.2,
-        "enabled": true,
-        "median_window": 3
-      },
-      "nudge_speed": 0.05,
-      "priority": 2,
-      "tag_name": "Kiln speed SP"
     },
     "LOI (C4N)": {
       "default_max": 100,
@@ -1413,7 +1263,7 @@
       "tag_name": "LOI (C4P)"
     },
     "NOx (Kiln)": {
-      "default_max": 1000,
+      "default_max": 100,
       "default_min": 0,
       "filtering": {
         "ema_alpha": 0.2,
@@ -1422,12 +1272,12 @@
       },
       "nudge_speed": 0.05,
       "op_summary": true,
-      "position": 11,
+      "position": 3,
       "priority": 3,
       "tag_name": "NOx (Kiln)"
     },
     "O2 (C3)": {
-      "default_max": 3,
+      "default_max": 100,
       "default_min": 0,
       "filtering": {
         "ema_alpha": 0.2,
@@ -1436,12 +1286,12 @@
       },
       "nudge_speed": 0.05,
       "op_summary": true,
-      "position": 12,
+      "position": 17,
       "priority": 3,
       "tag_name": "O2 (C3)"
     },
     "O2 (Kiln)": {
-      "default_max": 3,
+      "default_max": 100,
       "default_min": 0,
       "filtering": {
         "ema_alpha": 0.2,
@@ -1450,12 +1300,12 @@
       },
       "nudge_speed": 0.05,
       "op_summary": true,
-      "position": 13,
+      "position": 1,
       "priority": 2,
       "tag_name": "O2 (Kiln)"
     },
     "PC outlet T1": {
-      "default_max": 1150,
+      "default_max": 100,
       "default_min": 0,
       "filtering": {
         "ema_alpha": 0.2,
@@ -1464,12 +1314,12 @@
       },
       "nudge_speed": 0.05,
       "op_summary": true,
-      "position": 4,
+      "position": 15,
       "priority": 2,
       "tag_name": "PC outlet T1"
     },
     "PC outlet T2": {
-      "default_max": 1150,
+      "default_max": 100,
       "default_min": 0,
       "filtering": {
         "ema_alpha": 0.2,
@@ -1477,6 +1327,7 @@
         "median_window": 3
       },
       "nudge_speed": 0.05,
+      "position": 16,
       "priority": 2,
       "tag_name": "PC outlet T2"
     },
@@ -1528,43 +1379,7 @@
       "priority": 5,
       "tag_name": "PCI - RDF (PC)"
     },
-    "PCI - RIP (LER 190205) (Kiln)": {
-      "default_max": 7166.23,
-      "default_min": 0,
-      "filtering": {
-        "ema_alpha": 0.2,
-        "enabled": true,
-        "median_window": 3
-      },
-      "nudge_speed": 0.05,
-      "priority": 5,
-      "tag_name": "PCI - RIP (LER 190205) (Kiln)"
-    },
-    "PCI - RIP (LER 190208) (Kiln)": {
-      "default_max": 4165,
-      "default_min": 0,
-      "filtering": {
-        "ema_alpha": 0.2,
-        "enabled": true,
-        "median_window": 3
-      },
-      "nudge_speed": 0.05,
-      "priority": 5,
-      "tag_name": "PCI - RIP (LER 190208) (Kiln)"
-    },
-    "PCI - RIP (LER 191211) (Kiln)": {
-      "default_max": 5750,
-      "default_min": 0,
-      "filtering": {
-        "ema_alpha": 0.2,
-        "enabled": true,
-        "median_window": 3
-      },
-      "nudge_speed": 0.05,
-      "priority": 5,
-      "tag_name": "PCI - RIP (LER 191211) (Kiln)"
-    },
-    "PH boiler (ON/OFF)": {
+    "Petcoke (Kiln)": {
       "default_max": 100,
       "default_min": 0,
       "filtering": {
@@ -1573,10 +1388,11 @@
         "median_window": 3
       },
       "nudge_speed": 0.05,
-      "priority": 5,
-      "tag_name": "PH boiler (ON/OFF)"
+      "position": 12,
+      "priority": 2,
+      "tag_name": "Petcoke (Kiln)"
     },
-    "PH boiler bypass damper": {
+    "Petcoke (PC)": {
       "default_max": 100,
       "default_min": 0,
       "filtering": {
@@ -1585,8 +1401,9 @@
         "median_window": 3
       },
       "nudge_speed": 0.05,
-      "priority": 5,
-      "tag_name": "PH boiler bypass damper"
+      "position": 21,
+      "priority": 2,
+      "tag_name": "Petcoke (PC)"
     },
     "Petcoke SP (PC)": {
       "default_max": 5.5,
@@ -1641,6 +1458,32 @@
       "scale_factor": 0.1,
       "tag_name": "Quench fan speed SP"
     },
+    "RDF (Kiln)": {
+      "default_max": 100,
+      "default_min": 0,
+      "filtering": {
+        "ema_alpha": 0.2,
+        "enabled": true,
+        "median_window": 3
+      },
+      "nudge_speed": 0.05,
+      "position": 7,
+      "priority": 2,
+      "tag_name": "RDF (Kiln)"
+    },
+    "RDF 1 (PC)": {
+      "default_max": 100,
+      "default_min": 0,
+      "filtering": {
+        "ema_alpha": 0.2,
+        "enabled": true,
+        "median_window": 3
+      },
+      "nudge_speed": 0.05,
+      "position": 19,
+      "priority": 2,
+      "tag_name": "RDF 1 (PC)"
+    },
     "RDF 1 SP (PC)": {
       "default_max": 10,
       "default_min": 0,
@@ -1652,6 +1495,19 @@
       "nudge_speed": 0.05,
       "priority": 2,
       "tag_name": "RDF 1 SP (PC)"
+    },
+    "RDF 2 (PC)": {
+      "default_max": 100,
+      "default_min": 0,
+      "filtering": {
+        "ema_alpha": 0.2,
+        "enabled": true,
+        "median_window": 3
+      },
+      "nudge_speed": 0.05,
+      "position": 20,
+      "priority": 2,
+      "tag_name": "RDF 2 (PC)"
     },
     "RDF 2 SP (PC)": {
       "default_max": 10,
@@ -1677,8 +1533,8 @@
       "priority": 2,
       "tag_name": "RDF SP (Kiln)"
     },
-    "RIP (LER 190205) (Kiln)": {
-      "default_max": 6.07,
+    "RIP (Kiln)": {
+      "default_max": 100,
       "default_min": 0,
       "filtering": {
         "ema_alpha": 0.2,
@@ -1686,32 +1542,9 @@
         "median_window": 3
       },
       "nudge_speed": 0.05,
+      "position": 5,
       "priority": 2,
-      "tag_name": "RIP (LER 190205) (Kiln)"
-    },
-    "RIP (LER 190208) (Kiln)": {
-      "default_max": 6.2,
-      "default_min": 0,
-      "filtering": {
-        "ema_alpha": 0.2,
-        "enabled": true,
-        "median_window": 3
-      },
-      "nudge_speed": 0.05,
-      "priority": 2,
-      "tag_name": "RIP (LER 190208) (Kiln)"
-    },
-    "RIP (LER 191211) (Kiln)": {
-      "default_max": 0,
-      "default_min": 0,
-      "filtering": {
-        "ema_alpha": 0.2,
-        "enabled": true,
-        "median_window": 3
-      },
-      "nudge_speed": 0.05,
-      "priority": 2,
-      "tag_name": "RIP (LER 191211) (Kiln)"
+      "tag_name": "RIP (Kiln)"
     },
     "RIP SP (Kiln)": {
       "default_max": 2000,
@@ -1787,7 +1620,7 @@
       "tag_name": "Secondary air T1"
     },
     "Secondary air T2": {
-      "default_max": 1100,
+      "default_max": 100,
       "default_min": 0,
       "filtering": {
         "ema_alpha": 0.2,
@@ -1796,7 +1629,7 @@
       },
       "nudge_speed": 0.05,
       "op_summary": true,
-      "position": 19,
+      "position": 6,
       "priority": 2,
       "tag_name": "Secondary air T2"
     },
@@ -1836,22 +1669,6 @@
       "priority": 5,
       "tag_name": "Stack - TOC (dry, 10% O2)"
     },
-    "TNC level": {
-      "default_max": 54.16,
-      "default_min": 0,
-      "description": "Kiln filling degree cur",
-      "filtering": {
-        "ema_alpha": 0.2,
-        "enabled": true,
-        "median_window": 3
-      },
-      "formula_key": "filling_degree",
-      "is_calculated": true,
-      "nudge_speed": 0.05,
-      "priority": 0,
-      "tag_name": "TNC level",
-      "unit": "%"
-    },
     "Tert air damper SP": {
       "default_max": 100,
       "default_min": 0,
@@ -1864,20 +1681,6 @@
       "priority": 2,
       "tag_name": "Tert air damper SP"
     },
-    "Tert air duct dP": {
-      "default_max": -10,
-      "default_min": -3,
-      "filtering": {
-        "ema_alpha": 0.2,
-        "enabled": true,
-        "median_window": 3
-      },
-      "nudge_speed": 0.05,
-      "op_summary": true,
-      "position": 15,
-      "priority": 2,
-      "tag_name": "Tert air duct dP"
-    },
     "Tert air duct dP (calc)": {
       "default_max": 14.22,
       "default_min": -18.87,
@@ -1889,32 +1692,6 @@
       "nudge_speed": 0.05,
       "priority": 5,
       "tag_name": "Tert air duct dP (calc)"
-    },
-    "Tert air duct inlet P": {
-      "default_max": 10.72,
-      "default_min": -10,
-      "filtering": {
-        "ema_alpha": 0.2,
-        "enabled": true,
-        "median_window": 3
-      },
-      "nudge_speed": 0.05,
-      "op_summary": false,
-      "priority": 2,
-      "tag_name": "Tert air duct inlet P"
-    },
-    "Tert air duct outlet P": {
-      "default_max": 10.71,
-      "default_min": -10,
-      "filtering": {
-        "ema_alpha": 0.2,
-        "enabled": true,
-        "median_window": 3
-      },
-      "nudge_speed": 0.05,
-      "op_summary": false,
-      "priority": 2,
-      "tag_name": "Tert air duct outlet P"
     },
     "Thermal split (PC/Kiln)": {
       "default_max": 100,
@@ -2076,9 +1853,6 @@
       "RDF 2 (PC)": 0.1,
       "RIP (Kiln)": 0.08
     }
-  },
-  "pirl_mpc_config": {
-    "enabled": true
   },
   "safety_rules": [
     {
@@ -2397,7 +2171,7 @@
     "thresholds": {
       "ai": 70,
       "fingerprint": 50,
-      "hybrid_bias": 1
+      "hybrid_bias": 20
     }
   },
   "upset_conditions": {
@@ -2715,6 +2489,9 @@
         ]
       }
     }
+  },
+  "pirl_mpc_config": {
+    "enabled": false
   },
   "version": "22.0"
 }

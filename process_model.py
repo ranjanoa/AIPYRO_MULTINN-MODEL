@@ -382,14 +382,28 @@ def finalize_setpoints_for_db(recommendation, current_state, config):
         if not name: continue
 
         # Use the engine's pre-computed nudge_target.
-        # This is what the UI shows, and this is what should be written to the DB.
         nudge_val = act.get('nudge_target')
         if nudge_val is not None:
+            # --- GUARDIAN: 5% RELATIVE SAFETY CLAMP ---
+            # Ensure the suggested move never exceeds 5% of the current value.
+            curr_val = float(current_state.get(name, 0.0) or 0.0)
+            if curr_val > 0:
+                max_allowed_change = curr_val * 0.05
+                clamped_val = float(np.clip(nudge_val, curr_val - max_allowed_change, curr_val + max_allowed_change))
+                if abs(clamped_val - nudge_val) > 0.001:
+                    print(f"[GUARDIAN] Clamped {name}: {nudge_val:.2f} -> {clamped_val:.2f} (5% Limit)")
+                nudge_val = clamped_val
+            
             setpoints[name] = float(nudge_val)
         else:
             # Fallback: use fingerprint_set_point (raw target) if nudge not available
             raw = act.get('fingerprint_set_point') or act.get('final_target') or act.get('setpoint')
             if raw is not None:
+                # Still apply the 5% cap even to raw targets for absolute safety
+                curr_val = float(current_state.get(name, 0.0) or 0.0)
+                if curr_val > 0:
+                    max_allowed = curr_val * 0.05
+                    raw = float(np.clip(raw, curr_val - max_allowed, curr_val + max_allowed))
                 setpoints[name] = float(raw)
 
     return setpoints
