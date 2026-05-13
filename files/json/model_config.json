@@ -1771,7 +1771,7 @@
     "enabled": false
   },
   "reactive_governor": {
-    "active_step_pct": 0.01,
+    "active_step_pct": 0.1,
     "blockers": [
       {
         "limit": 10000,
@@ -1801,8 +1801,8 @@
         "rescue_fuels": [
           "Petcoke (PC)"
         ],
-        "temp_max": 950,
-        "temp_min": 900,
+        "temp_max": 990,
+        "temp_min": 940,
         "temp_tag": "PC outlet T1"
       }
     ]
