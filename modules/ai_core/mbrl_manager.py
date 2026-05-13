@@ -715,6 +715,41 @@ def train_system_offline():
         elif len(zero_cols) > 0:
             print(f"⚠️  WARNING: {len(zero_cols)} columns contain ONLY zeros. Examples: {zero_cols[:3]}")
 
+        # 4. OUTLIER AUDIT (New Diagnostics)
+        print("\n🚩 --- DATA AUDIT: OUTLIER DETECTION ---")
+        suspicious_vars = []
+        for c in required_cols:
+            c_min = df[c].min()
+            c_max = df[c].max()
+            c_mean = df[c].mean()
+            c_median = df[c].median()
+
+            # Logic: If max is more than 100x the median (and median > 1), it's likely a spike
+            if c_median > 1.0 and c_max > (c_median * 100):
+                suspicious_vars.append(f"  - {c}: Spike Detected (Max: {c_max:.1f} vs Median: {c_median:.1f})")
+            
+            # Logic: If an indicator that should be positive (O2, Temp, etc) is negative
+            if c_min < -0.1 and ('O2' in c or 'Temp' in c or 'production' in c):
+                suspicious_vars.append(f"  - {c}: Negative Value (Min: {c_min:.1f})")
+
+        if suspicious_vars:
+            print("⚠️ CAUTION: The following variables have extreme ranges that will degrade AI performance:")
+            for msg in suspicious_vars:
+                print(msg)
+            print("🛠️ ACTION: Applying 'Industrial Clamping' to neutralize outliers...")
+            
+            # --- DATA CLAMPING STEP ---
+            all_cfg = {**process_model.get_control_variables(), **process_model.get_indicator_variables()}
+            for c in required_cols:
+                if c in all_cfg:
+                    lo = all_cfg[c].get('default_min', -999999)
+                    hi = all_cfg[c].get('default_max', 999999)
+                    # If config says 0-100, but data is 4,000,000, clip it to 100
+                    df[c] = df[c].clip(lower=lo, upper=hi)
+            print("✅ Data Clamped to configuration ranges.")
+        else:
+            print("✅ No extreme outliers detected in the active feature set.")
+
     except Exception as e:
         print(f"❌ CRITICAL Error reading CSV during diagnostics: {e}")
         return
