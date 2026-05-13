@@ -432,7 +432,7 @@
             "nudge_speed": 0.05,
             "op_summary": true,
             "position": 6,
-            "priority": 2,
+            "priority": 1,
             "tag_name": "Kiln feed",
             "unit": "t/h"
         },
@@ -484,7 +484,7 @@
             "nudge_speed": 0.05,
             "op_summary": true,
             "position": 1,
-            "priority": 2,
+            "priority": 1,
             "tag_name": "Petcoke (Kiln)",
             "unit": "t/h"
         },
@@ -502,7 +502,7 @@
             "nudge_speed": 0.05,
             "op_summary": true,
             "position": 3,
-            "priority": 2,
+            "priority": 1,
             "tag_name": "Petcoke (PC)",
             "unit": "t/h"
         },
@@ -555,7 +555,7 @@
             "nudge_speed": 0.05,
             "op_summary": true,
             "position": 2,
-            "priority": 2,
+            "priority": 1,
             "tag_name": "RDF (Kiln)",
             "unit": "t/h"
         },
@@ -573,7 +573,7 @@
             "nudge_speed": 0.05,
             "op_summary": true,
             "position": 4,
-            "priority": 2,
+            "priority": 1,
             "tag_name": "RDF 1 (PC)",
             "unit": "t/h"
         },
@@ -591,7 +591,7 @@
             "nudge_speed": 0.05,
             "op_summary": true,
             "position": 5,
-            "priority": 2,
+            "priority": 1,
             "tag_name": "RDF 2 (PC)",
             "unit": "t/h"
         },
@@ -608,7 +608,7 @@
             "is_setpoint": true,
             "nudge_speed": 0.05,
             "op_summary": true,
-            "priority": 0,
+            "priority": 1,
             "tag_name": "RIP (Kiln)",
             "unit": "l/h"
         },
