@@ -127,6 +127,14 @@ def _initialize_system():
                 df_train[c] = 0.0
             df_train[c] = pd.to_numeric(df_train[c], errors='coerce').fillna(0.0)
 
+        # --- CRITICAL FIX: Clamp historical data to config limits BEFORE calculating stats ---
+        all_cfg = {**process_model.get_control_variables(), **process_model.get_indicator_variables()}
+        for c in df_train.columns:
+            if c in all_cfg:
+                lo = all_cfg[c].get('default_min', -1e9)
+                hi = all_cfg[c].get('default_max', 1e9)
+                df_train[c] = df_train[c].clip(lower=lo, upper=hi)
+
         s_min, s_max = df_train[s_cols].min().values, df_train[s_cols].max().values
         a_min, a_max = df_train[a_cols].min().values, df_train[a_cols].max().values
 
