@@ -156,10 +156,12 @@ class SACAgent:
 
         self.critic_optim.zero_grad()
         qf1_loss.backward()
+        torch.nn.utils.clip_grad_norm_(self.critic.parameters(), 1.0)
         self.critic_optim.step()
 
         self.critic2_optim.zero_grad()
         qf2_loss.backward()
+        torch.nn.utils.clip_grad_norm_(self.critic2.parameters(), 1.0)
         self.critic2_optim.step()
 
         pi, log_pi, _ = self.policy.sample(state_batch)
@@ -171,6 +173,7 @@ class SACAgent:
 
         self.policy_optim.zero_grad()
         policy_loss.backward()
+        torch.nn.utils.clip_grad_norm_(self.policy.parameters(), 1.0)
         self.policy_optim.step()
 
         # Soft Updates

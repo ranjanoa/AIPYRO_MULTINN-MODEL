@@ -29,3 +29,8 @@ static_20260415.zip
 static_20260415/
 templates.zip
 benchmark_report.md
+*.pth
+models/
+build/
+dist/
+launcher_temp/

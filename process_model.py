@@ -377,19 +377,122 @@ def finalize_setpoints_for_db(recommendation, current_state, config):
     setpoints = {}
     actions = recommendation.get('actions', [])
 
+    # --- EXPERT OPERATOR: MODULAR REACTIVE GOVERNOR ---
+    gov = config.get('reactive_governor', {})
+    gov_enabled = gov.get('enabled', False)
+    
+    # 1. Evaluate Absolute Blockers (e.g. CO, SO2)
+    block_all_fuels = False
+    if gov_enabled:
+        for blocker in gov.get('blockers', []):
+            val = float(current_state.get(blocker.get('tag', ''), 0.0) or 0.0)
+            if val > blocker.get('limit', 99999):
+                block_all_fuels = True
+                print(f"[GOVERNOR] BLOCKED: {blocker.get('tag')} is {val:.0f}. All fuel increases locked.")
+                break
+
+    # 2. Evaluate Thermal Zones (Kiln & PC independently)
+    zone_states = {}
+    if gov_enabled:
+        for z in gov.get('zones', []):
+            z_temp = float(current_state.get(z.get('temp_tag', ''), 0.0) or 0.0)
+            if z_temp <= 0: continue
+                
+            z_state = {'block_opt': False, 'drive_rescue': False, 'drive_rescue_down': False, 'drive_opt': False}
+            if z_temp < z.get('temp_min', 0):
+                z_state['block_opt'] = True
+                z_state['drive_rescue'] = True
+                print(f"[GOVERNOR] {z.get('name')} Rescue: Temp is {z_temp:.0f}. Blocking Opt Fuels, Driving Rescue UP.")
+            elif z_temp > z.get('temp_max', 9999):
+                z_state['drive_rescue_down'] = True
+                print(f"[GOVERNOR] {z.get('name')} Cooling: Temp is {z_temp:.0f}. Driving Rescue DOWN.")
+            else:
+                z_state['drive_opt'] = True
+                
+            zone_states[z.get('name')] = {
+                'state': z_state,
+                'rescue_fuels': z.get('rescue_fuels', []),
+                'opt_fuels': z.get('opt_fuels', [])
+            }
+
     for act in actions:
         name = act.get('var_name')
         if not name: continue
 
         # Use the engine's pre-computed nudge_target.
-        # This is what the UI shows, and this is what should be written to the DB.
         nudge_val = act.get('nudge_target')
         if nudge_val is not None:
+            curr_val = float(current_state.get(name, 0.0) or 0.0)
+            
+            # --- GOVERNOR FUEL LOCKOUT & ACTIVE DRIVING ---
+            if gov_enabled and curr_val > 0:
+                # Find which zone this fuel belongs to
+                my_zone = None
+                for z_name, z_info in zone_states.items():
+                    if name in z_info['rescue_fuels'] or name in z_info['opt_fuels']:
+                        my_zone = z_info
+                        break
+                
+                if my_zone:
+                    zs = my_zone['state']
+                    is_rescue = name in my_zone['rescue_fuels']
+                    is_opt = name in my_zone['opt_fuels']
+                    active_step = curr_val * gov.get('active_step_pct', 0.01)
+
+                    def add_gov_msg(msg):
+                        print(f"[GOVERNOR] {msg}")
+                        recommendation.setdefault('upset_summary', []).append(f"Governor: {msg}")
+                        recommendation['upset_active'] = True
+
+                    # A. Handle Lockouts (If AI is increasing fuel)
+                    if nudge_val > curr_val:
+                        if block_all_fuels:
+                            add_gov_msg(f"Cancelled {name} increase due to Blocker.")
+                            nudge_val = curr_val
+                        elif zs['block_opt'] and is_opt:
+                            add_gov_msg(f"Cancelled {name} increase due to low Temp.")
+                            nudge_val = curr_val
+
+                    # B. Handle Active Driving UP (Rescue or Optimization)
+                    if not block_all_fuels:
+                        if zs['drive_rescue'] and is_rescue:
+                            forced_val = curr_val + active_step
+                            if nudge_val < forced_val:
+                                add_gov_msg(f"Actively driving {name} UP (+{active_step:.2f}) to rescue Temp.")
+                                nudge_val = forced_val
+                        elif zs['drive_opt'] and is_opt:
+                            forced_val = curr_val + active_step
+                            if nudge_val < forced_val:
+                                add_gov_msg(f"Actively driving {name} UP (+{active_step:.2f}) for Optimization.")
+                                nudge_val = forced_val
+
+                    # C. Handle Active Cooling DOWN (If too hot)
+                    if zs['drive_rescue_down'] and is_rescue:
+                        forced_val = curr_val - active_step
+                        if nudge_val > forced_val:
+                            add_gov_msg(f"Actively driving {name} DOWN (-{active_step:.2f}) to cool Temp.")
+                            nudge_val = forced_val
+
+            # --- GUARDIAN: 5% RELATIVE SAFETY CLAMP ---
+            # Ensure the suggested move never exceeds 5% of the current value.
+            curr_val = float(current_state.get(name, 0.0) or 0.0)
+            if curr_val > 0:
+                max_allowed_change = curr_val * 0.05
+                clamped_val = float(np.clip(nudge_val, curr_val - max_allowed_change, curr_val + max_allowed_change))
+                if abs(clamped_val - nudge_val) > 0.001:
+                    print(f"[GUARDIAN] Clamped {name}: {nudge_val:.2f} -> {clamped_val:.2f} (5% Limit)")
+                nudge_val = clamped_val
+            
             setpoints[name] = float(nudge_val)
         else:
             # Fallback: use fingerprint_set_point (raw target) if nudge not available
             raw = act.get('fingerprint_set_point') or act.get('final_target') or act.get('setpoint')
             if raw is not None:
+                # Still apply the 5% cap even to raw targets for absolute safety
+                curr_val = float(current_state.get(name, 0.0) or 0.0)
+                if curr_val > 0:
+                    max_allowed = curr_val * 0.05
+                    raw = float(np.clip(raw, curr_val - max_allowed, curr_val + max_allowed))
                 setpoints[name] = float(raw)
 
     return setpoints

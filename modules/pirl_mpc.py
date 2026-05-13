@@ -27,10 +27,10 @@ LITERATURE_DEFAULTS = {
     'draft_suction_factor': 0.012, 'gas_expansion_factor': 0.001,
     'gas_velocity_factor': 0.05, 'mill_resistance_penalty': 0.25,
     'clinker_melt_point': 1380.0, 'liquid_phase_multiplier': 0.015,
-    'base_torque_factor': 5.72, 'base_co_ppm': 50.0, 'rdf_co_factor': 15.0,
+    'base_torque_factor': 4.5, 'base_co_ppm': 50.0, 'rdf_co_factor': 15.0,
     'tau_fuel_mins': 8.0, 'tau_draft_mins': 1.5, 'tau_thermal_refractory': 15.0,
     'max_safe_bzt': 1550.0, 'min_safe_bzt': 1350.0,
-    'min_safe_torque': 100.0, 'max_safe_torque': 350.0,
+    'min_safe_torque': 150.0, 'max_safe_torque': 350.0,
     'min_o2_excess': 1.2, 'max_safe_pressure': -0.5,
     'max_exhaust_temp': 1050.0, 'max_safe_co_ppm': 800.0,
     'correction_factor': 0.5,
@@ -253,7 +253,10 @@ class PIRL_MPC_Controller:
                 elif 'id fan' in fn_lower or 'id_fan' in fn_lower: mapping[friendly_name] = 'draft'
                 elif 'kiln speed' in fn_lower: mapping[friendly_name] = 'speed'
                 elif 'bzt' in fn_lower or 'burning' in fn_lower: mapping[friendly_name] = 'bzt'
-                elif 'torque' in fn_lower or ('kiln' in fn_lower and ('amps' in fn_lower or 'kw' in fn_lower)): mapping[friendly_name] = 'torque'
+                elif 'torque' in fn_lower or ('kiln' in fn_lower and ('amps' in fn_lower or 'kw' in fn_lower)):
+                    # Guard: If we already have a torque mapping, don't add more (prevents summing motor 1 + motor 2 + total)
+                    if 'torque' not in mapping.values():
+                        mapping[friendly_name] = 'torque'
                 elif 'pressure' in fn_lower or 'hood' in fn_lower or 'inlet' in fn_lower: mapping[friendly_name] = 'pressure'
                 elif 'exhaust' in fn_lower or 'preheater' in fn_lower or 'egt' in fn_lower: mapping[friendly_name] = 'exhaust_temp'
                 elif 'co' in fn_lower and 'ppm' in fn_lower: mapping[friendly_name] = 'co_ppm'

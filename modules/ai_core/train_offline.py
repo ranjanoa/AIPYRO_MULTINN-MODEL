@@ -20,24 +20,24 @@ if os.path.exists(modules_dir) and modules_dir not in sys.path:
 # ==============================================================================
 # 2. ROBUST IMPORT LOGIC
 # ==============================================================================
-print(f"🔍 DEBUG: Project Root set to: {current_dir}")
+print(f"DEBUG: Project Root set to: {current_dir}")
 
 try:
     # Attempt 1: Standard Project Structure (Preferred)
     from modules.ai_core import mbrl_manager as sac_manager
 
-    print("✅ Success: Imported 'modules.ai_core.mbrl_manager'")
+    print("Success: Imported 'modules.ai_core.mbrl_manager'")
 except ImportError as e:
-    print(f"⚠️ Primary Import Failed: {e}")
+    print(f"Warning: Primary Import Failed: {e}")
     try:
         # Attempt 2: Direct Import (Fallback)
         # We import 'mbrl_manager' but alias it as 'sac_manager'
         # so the variable is defined for the rest of the script.
         import mbrl_manager as sac_manager
 
-        print("✅ Success: Imported 'mbrl_manager' directly as 'sac_manager'")
+        print("Success: Imported 'mbrl_manager' directly as 'sac_manager'")
     except ImportError as e2:
-        print(f"❌ CRITICAL ERROR: Could not import 'mbrl_manager'.")
+        print("CRITICAL ERROR: Could not import 'mbrl_manager'.")
         print(f"   Reason 1: {e}")
         print(f"   Reason 2: {e2}")
         print("\n   Please ensure 'mbrl_manager.py' exists in 'modules/ai_core/' or the root folder.")

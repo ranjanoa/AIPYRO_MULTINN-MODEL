@@ -396,7 +396,7 @@ def automated_control_loop():
                         fp_score = float(fp_rec.get('match_score', 0)) if fp_rec and isinstance(fp_rec.get('match_score'), (int, float)) else 0
                         
                         ai_rec = None
-                        if mbrl_manager and current_mode in (1, 3):
+                        if mbrl_manager and current_mode in (1, 3, 4):
                             try:
                                 import concurrent.futures
                                 with concurrent.futures.ThreadPoolExecutor(max_workers=1) as _nn_executor:
@@ -447,6 +447,22 @@ def automated_control_loop():
                                 recommendation['active_strategy'] = "FINGERPRINT"
                                 recommendation['driver'] = "HISTORY"
                         
+                        elif current_mode == 3:  # HYBRID AUTO-ARBITRATION
+                            # Compare FP Score (with bias) vs AI Score
+                            bias = float(trust_thresholds.get('hybrid_bias', 5.0))
+                            if (fp_score + bias) >= ai_score:
+                                recommendation = fp_rec
+                                if recommendation:
+                                    recommendation['active_strategy'] = "HYBRID-FP"
+                                    recommendation['driver'] = "HISTORY"
+                            elif ai_rec:
+                                recommendation = ai_rec
+                                if recommendation:
+                                    recommendation['active_strategy'] = "HYBRID-AI"
+                                    recommendation['driver'] = "AI-NN"
+                            else:
+                                recommendation = fp_rec
+
                         elif current_mode == 1:  # AI ONLY
                             if ai_rec:
                                 recommendation = ai_rec
@@ -566,9 +582,11 @@ def automated_control_loop():
                                     setpoints[target] = curr * (1.0 + adj/100.0) if act.get("is_percentage") else curr + adj
                                 
                                 recommendation['upset_active'] = True
-                                recommendation['upset_summary'] = [f"{a.get('rule_id','?')}: {a.get('description', '')}" for a in upset_actions]
+                                existing_upsets = recommendation.get('upset_summary', [])
+                                recommendation['upset_summary'] = existing_upsets + [f"{a.get('rule_id','?')}: {a.get('description', '')}" for a in upset_actions]
                             else:
-                                recommendation['upset_active'] = False
+                                if 'upset_active' not in recommendation:
+                                    recommendation['upset_active'] = False
 
                             # --- UI SYNCHRONIZATION ---
                             # Rebuild recommendation['actions'] so the dashboard always 

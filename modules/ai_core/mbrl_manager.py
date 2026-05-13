@@ -48,7 +48,7 @@ except ImportError:
 MODELS_DIR = getattr(config, 'MODELS_DIR', "files/models")
 WM_PATH = os.path.join(MODELS_DIR, "ensemble_wm")
 SAC_PATH = os.path.join(MODELS_DIR, "sac_agent")
-HISTORY_WINDOW = 5
+HISTORY_WINDOW = 30
 
 # --- GLOBAL STATE ---
 _world_model = None
@@ -224,6 +224,17 @@ def predict_soft_sensor_rollout(current_real_df, pred_var_name, steps=60):
     held_norm_action = norm_a[-1]
 
     predictions = []
+    
+    # CASE 1: Action Variables (Controls like Petcoke, Feed)
+    # The World Model doesn't "predict" actions, so we project the AI's intended nudge ramp.
+    if pred_var_name in a_cols:
+        target_val = current_real_df[pred_var_name].iloc[-1]
+        # In a real cycle, we would have the AI target here. 
+        # Since this is a generic rollout call, we just show the projected hold.
+        # But for the UI, we want to see the "path".
+        return [float(target_val)] * steps
+
+    # CASE 2: State Variables (Indicators like O2, Temperature)
     try:
         target_idx = s_cols.index(pred_var_name)
     except ValueError:
@@ -468,71 +479,47 @@ def get_optimal_action(current_real_df):
         val_prediction = pred_temps[-1] if pred_temps else 0.0
         if np.isnan(val_prediction) or np.isinf(val_prediction): val_prediction = 0.0
 
-    # GENERATE FULL ROLLOUTS FOR ALL VARIABLES (FOR THE UI CHART)
-    # This enables the "Dynamic Predictive Chart" in AI mode
-    ai_rollouts = {}
-    if _world_model is not None:
-        # We project the top variables for the UI to ensure smoothness
-        # including all controls and primary indicators
-        ui_vars = list(a_cols) + [target_var_name]
-        for v in ui_vars:
-            if v:
-                rollout = predict_soft_sensor_rollout(current_real_df, v, steps=15)
-                if rollout:
-                    ai_rollouts[v] = [float(x) for x in rollout]
-
-    soft_sensors = {}
-    soft_sensors[out_keys['confidence']] = val_confidence
-    soft_sensors[out_keys['prediction']] = val_prediction
-    for tag, val in raw_ai_targets.items():
-        key_name = f"sac_rec_{tag}"
-        if np.isnan(val) or np.isinf(val): val = 0.0
-        soft_sensors[key_name] = val
-
+    # --------------------------------------------------------------------------
+    # POST-PROCESS: Action Packaging & Safety Clamping
+    # --------------------------------------------------------------------------
     ui_actions = []
+    final_clamped_targets = {}
+    
     for tag in a_cols:
         current_val = float(latest_vals.get(tag, 0.0))
         ultimate_goal = raw_ai_targets.get(tag, current_val)
 
         def_min = controls_cfg.get(tag, {}).get('default_min', -9999)
         def_max = controls_cfg.get(tag, {}).get('default_max', 9999)
-        ultimate_goal = max(def_min, min(def_max, ultimate_goal))
-
-        # Industrial Nudge Calculation (Centralized utility)
-        # ONLY apply nudge if variable is in the Control section. Otherwise, 100% Jump.
-        if tag in controls_cfg:
-            gain = abs(float(controls_cfg[tag].get('nudge_speed', 0.15)))
-        else:
-            gain = 1.0 # Indicators/Misc are NOT dampened
         
-        nudged_val = apply_industrial_nudge(
-            current_val, ultimate_goal, gain, def_min, def_max
-        )
+        # 5% SAFETY CAP: Limits the AI's goal to within +/- 5% of current
+        max_deviation = abs(current_val) * 0.05
+        if max_deviation < 0.01:
+            max_deviation = abs(def_max - def_min) * 0.01
+            
+        lo_limit = max(def_min, current_val - max_deviation)
+        hi_limit = min(def_max, current_val + max_deviation)
+        ultimate_goal = max(lo_limit, min(hi_limit, ultimate_goal))
+        
+        final_clamped_targets[tag] = ultimate_goal
 
-        if abs(nudged_val - ultimate_goal) < 0.001:
-            reason = "Fine Tuning"
-        else:
-            reason = "Ramping Nudge"
-
-        # Final safety check before JSON serialization
-        if np.isnan(nudged_val) or np.isinf(nudged_val): nudged_val = 0.0
+        # Industrial Nudge Calculation
+        gain = abs(float(controls_cfg.get(tag, {}).get('nudge_speed', 0.15)))
+        nudged_val = apply_industrial_nudge(current_val, ultimate_goal, gain, def_min, def_max)
 
         ui_actions.append({
             "var_name": tag,
-            "fingerprint_set_point": float(ultimate_goal), # Absolute NN Output
-            "nudge_target": float(nudged_val), # Safe 1% throttle
+            "fingerprint_set_point": float(ultimate_goal),
+            "nudge_target": float(nudged_val),
             "final_target": float(ultimate_goal),
             "current_setpoint": str(round(current_val, 2)),
             "unit": controls_cfg.get(tag, {}).get('unit', ''),
-            "reason": reason
+            "reason": "Optimizing (AI-NN)"
         })
 
     # 2. GENERATE CALCULATED ACTIONS (derived variables)
-    # Ensuring the AI mode also respects formula-driven dependencies
     calc_vars_cfg = full_config.get('calculated_variables', {})
     indicators_cfg = process_model.get_indicator_variables()
-    
-    # We use map_tags_to_friendly_names logic here to ensure current_state is clean
     current_state_map = latest_vals.to_dict()
     mapped_state = {process_model.get_tag_to_name_map().get(k, k): v for k, v in current_state_map.items()}
 
@@ -540,27 +527,50 @@ def get_optimal_action(current_real_df):
         ui_actions, mapped_state, controls_cfg, indicators_cfg, calc_vars_cfg
     )
     
-    # Merge calculated actions into the final list
     calc_names = {c['var_name'] for c in calc_actions}
     ui_actions = [a for a in ui_actions if a.get('var_name') not in calc_names]
     ui_actions.extend(calc_actions)
 
+    # 3. GENERATE FULL ROLLOUTS FOR ALL VARIABLES (FOR THE UI CHART)
+    ai_rollouts = {}
+    if _world_model is not None:
+        # Include Controls AND Indicators in the pre-calculated curves
+        ui_vars = list(a_cols) + list(s_cols)
+        for v in ui_vars:
+            if not v: continue
+            if v in a_cols:
+                curr = float(latest_vals.get(v, 0))
+                # Use the finalized clamped target
+                target = final_clamped_targets.get(v, curr)
+                ramp = []
+                for m in range(30):
+                    if m <= 10: ramp.append(curr + (target - curr) * (m / 10))
+                    else: ramp.append(target)
+                ai_rollouts[v] = ramp
+            else:
+                rollout = predict_soft_sensor_rollout(current_real_df, v, steps=30)
+                if rollout: ai_rollouts[v] = [float(x) for x in rollout]
+
+    soft_sensors = {}
+    soft_sensors[out_keys['confidence']] = val_confidence
+    soft_sensors[out_keys['prediction']] = val_prediction
+    for tag, val in final_clamped_targets.items():
+        soft_sensors[f"sac_rec_{tag}"] = val
 
     return {
-        "match_score": "SAC-MBRL" if SAC_AVAILABLE else "AI-ASSIST",
+        "match_score": "SAC-MBRL",
         "confidence": val_confidence,
-        "timestamp": str(datetime.now()),
         "actions": ui_actions,
-        "debug_message": "Policy Active (Ramping)",
         "soft_sensors": soft_sensors,
-        "fingerprint_prediction": ai_rollouts
+        "fingerprint_prediction": ai_rollouts,
+        "active_strategy": "AI"
     }
 
 
 # ==============================================================================
 # 6. OFFLINE TRAINING LOGIC
 # ==============================================================================
-def train_world_model(df, epochs=10, batch_size=1024):
+def train_world_model(df, epochs=10, batch_size=256):
     print(f"   >>> Training World Model ({epochs} epochs)...")
     s_cols = _env_config['s_cols']
     a_cols = _env_config['a_cols']
@@ -629,7 +639,7 @@ def train_sac_agent(df, steps=2000):
         buffer.push(state, action_norm, reward, next_state, done)
 
         if buffer.size > 256:
-            _sac_agent.update_parameters(buffer, batch_size=256)
+            _sac_agent.update_parameters(buffer, batch_size=64)
 
         state = next_state if not done else env.reset()
         if i % 500 == 0:

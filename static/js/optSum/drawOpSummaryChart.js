@@ -64,12 +64,9 @@ export function drawOpSummaryChart() {
                     yAxisID: yAxisId
                 });
 
-                // Guarantee a prediction line
+                // Only draw prediction if we actually have data for it
                 let predDataRaw = state.opPredictionData[tag];
-                if (!predDataRaw || predDataRaw.length === 0) {
-                    const curr = state.latestLiveValues[tag] !== undefined ? parseFloat(state.latestLiveValues[tag]) : (histData.length > 0 ? histData[histData.length - 1].y : 0);
-                    predDataRaw = Array(16).fill(curr);
-                }
+                if (!predDataRaw || predDataRaw.length === 0) return;
 
                 let predData = predDataRaw.map((val, minFromNow) => ({
                     x: minFromNow,

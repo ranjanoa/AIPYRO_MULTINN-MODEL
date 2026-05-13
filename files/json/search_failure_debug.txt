@@ -2532,3 +2532,472 @@ Rejected at tag: Coal Mill (ON/OFF)
 Current RT value: 0.7360
 Target range: [0.5520 to 0.9200]
 Config Limits: [0.0 to 1.0]
+
+--- 2026-05-12T18:15:45.574911 ---
+Phase: Standard
+Rejected at tag: Coal Mill (ON/OFF)
+Current RT value: 0.1000
+Target range: [0.0750 to 0.1250]
+Config Limits: [0.0 to 1.0]
+
+--- 2026-05-12T18:18:22.197963 ---
+Phase: Standard
+Rejected at tag: Coal Mill (ON/OFF)
+Current RT value: 0.1000
+Target range: [0.0750 to 0.1250]
+Config Limits: [0.0 to 1.0]
+
+--- 2026-05-12T18:20:35.847414 ---
+Phase: Standard
+Rejected at tag: Coal Mill (ON/OFF)
+Current RT value: 0.1000
+Target range: [0.0750 to 0.1250]
+Config Limits: [0.0 to 1.0]
+
+--- 2026-05-12T18:22:58.042234 ---
+Phase: Standard
+Rejected at tag: Coal Mill (ON/OFF)
+Current RT value: 0.1000
+Target range: [0.0750 to 0.1250]
+Config Limits: [0.0 to 1.0]
+
+--- 2026-05-12T18:27:17.844156 ---
+Phase: Standard
+Rejected at tag: Coal Mill (ON/OFF)
+Current RT value: 0.1000
+Target range: [0.0750 to 0.1250]
+Config Limits: [0.0 to 1.0]
+
+--- 2026-05-12T18:29:39.478297 ---
+Phase: Standard
+Rejected at tag: Coal Mill (ON/OFF)
+Current RT value: 0.1000
+Target range: [0.0750 to 0.1250]
+Config Limits: [0.0 to 1.0]
+
+--- 2026-05-12T18:31:52.589263 ---
+Phase: Standard
+Rejected at tag: Coal Mill (ON/OFF)
+Current RT value: 0.1000
+Target range: [0.0750 to 0.1250]
+Config Limits: [0.0 to 1.0]
+
+--- 2026-05-12T18:32:51.592646 ---
+Phase: Standard
+Rejected at tag: Quench fan speed
+Current RT value: 123.3453
+Target range: [92.5090 to 154.1816]
+Config Limits: [0.0 to 810.6]
+
+--- 2026-05-12T18:35:08.972903 ---
+Phase: Standard
+Rejected at tag: Quench fan gas flow
+Current RT value: 8.8861
+Target range: [6.6645 to 11.1076]
+Config Limits: [0.0 to 914.9]
+
+--- 2026-05-12T18:37:35.380483 ---
+Phase: Standard
+Rejected at tag: Quench fan gas flow
+Current RT value: 2.2904
+Target range: [1.7178 to 2.8630]
+Config Limits: [0.0 to 914.9]
+
+--- 2026-05-12T18:46:05.498296 ---
+Phase: Standard
+Rejected at tag: Quench fan speed
+Current RT value: 123.3453
+Target range: [92.5090 to 154.1816]
+Config Limits: [0.0 to 810.6]
+
+--- 2026-05-12T18:48:18.612533 ---
+Phase: Standard
+Rejected at tag: Quench fan speed
+Current RT value: 123.3453
+Target range: [92.5090 to 154.1816]
+Config Limits: [0.0 to 810.6]
+
+--- 2026-05-12T18:50:24.647067 ---
+Phase: Standard
+Rejected at tag: Quench fan speed
+Current RT value: 123.3453
+Target range: [92.5090 to 154.1816]
+Config Limits: [0.0 to 810.6]
+
+--- 2026-05-12T18:52:30.417830 ---
+Phase: Standard
+Rejected at tag: Quench fan speed
+Current RT value: 123.3453
+Target range: [92.5090 to 154.1816]
+Config Limits: [0.0 to 810.6]
+
+--- 2026-05-12T18:54:37.999665 ---
+Phase: Standard
+Rejected at tag: Quench fan speed
+Current RT value: 123.3453
+Target range: [92.5090 to 154.1816]
+Config Limits: [0.0 to 810.6]
+
+--- 2026-05-12T18:56:45.819464 ---
+Phase: Standard
+Rejected at tag: Quench fan speed
+Current RT value: 123.3453
+Target range: [92.5090 to 154.1816]
+Config Limits: [0.0 to 810.6]
+
+--- 2026-05-12T18:58:53.766398 ---
+Phase: Standard
+Rejected at tag: Quench fan speed
+Current RT value: 123.3453
+Target range: [92.5090 to 154.1816]
+Config Limits: [0.0 to 810.6]
+
+--- 2026-05-12T19:01:01.363191 ---
+Phase: Standard
+Rejected at tag: Quench fan speed
+Current RT value: 123.3453
+Target range: [92.5090 to 154.1816]
+Config Limits: [0.0 to 810.6]
+
+--- 2026-05-12T19:09:14.781969 ---
+Phase: Standard
+Rejected at tag: Coal Mill (ON/OFF)
+Current RT value: 0.1000
+Target range: [0.0750 to 0.1250]
+Config Limits: [0.0 to 1.0]
+
+--- 2026-05-12T19:11:18.242573 ---
+Phase: Standard
+Rejected at tag: Coal Mill (ON/OFF)
+Current RT value: 0.1000
+Target range: [0.0750 to 0.1250]
+Config Limits: [0.0 to 1.0]
+
+--- 2026-05-12T19:13:22.200031 ---
+Phase: Standard
+Rejected at tag: RIP (Kiln)
+Current RT value: 475.9573
+Target range: [356.9679 to 594.9466]
+Config Limits: [0.0 to 2000.0]
+
+--- 2026-05-12T19:15:26.652653 ---
+Phase: Standard
+Rejected at tag: Coal Mill (ON/OFF)
+Current RT value: 0.1000
+Target range: [0.0750 to 0.1250]
+Config Limits: [0.0 to 1.0]
+
+--- 2026-05-12T19:17:30.525864 ---
+Phase: Standard
+Rejected at tag: Coal Mill (ON/OFF)
+Current RT value: 0.1000
+Target range: [0.0750 to 0.1250]
+Config Limits: [0.0 to 1.0]
+
+--- 2026-05-12T19:19:58.505559 ---
+Phase: Standard
+Rejected at tag: Coal Mill (ON/OFF)
+Current RT value: 0.1000
+Target range: [0.0750 to 0.1250]
+Config Limits: [0.0 to 1.0]
+
+--- 2026-05-12T19:22:02.694642 ---
+Phase: Standard
+Rejected at tag: Coal Mill (ON/OFF)
+Current RT value: 0.1000
+Target range: [0.0750 to 0.1250]
+Config Limits: [0.0 to 1.0]
+
+--- 2026-05-12T19:49:27.320791 ---
+Phase: Standard
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 257.5876
+Target range: [193.1907 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-12T19:49:28.447860 ---
+Phase: Steering (Relaxed)
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 257.5876
+Target range: [0.0000 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-12T19:52:04.187379 ---
+Phase: Standard
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 261.9481
+Target range: [196.4611 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-12T19:52:05.338619 ---
+Phase: Steering (Relaxed)
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 261.9481
+Target range: [0.0000 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-12T19:53:02.585983 ---
+Phase: Standard
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 265.6490
+Target range: [199.2368 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-12T19:53:04.038153 ---
+Phase: Steering (Relaxed)
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 265.6490
+Target range: [0.0000 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-12T20:36:50.157791 ---
+Phase: Standard
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 270.3671
+Target range: [202.7753 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-12T20:36:51.467816 ---
+Phase: Steering (Relaxed)
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 270.3671
+Target range: [0.0000 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-12T20:38:55.058539 ---
+Phase: Standard
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 266.8673
+Target range: [200.1505 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-12T20:38:56.175121 ---
+Phase: Steering (Relaxed)
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 266.8673
+Target range: [0.0000 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-12T21:57:24.342197 ---
+Phase: Standard
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 280.9394
+Target range: [210.7045 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-12T21:57:26.007936 ---
+Phase: Steering (Relaxed)
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 280.9394
+Target range: [0.0000 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-12T21:59:32.207051 ---
+Phase: Standard
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 275.5293
+Target range: [206.6470 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-12T21:59:33.346473 ---
+Phase: Steering (Relaxed)
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 275.5293
+Target range: [0.0000 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-12T22:01:33.172437 ---
+Phase: Standard
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 271.0086
+Target range: [203.2565 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-12T22:01:34.315474 ---
+Phase: Steering (Relaxed)
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 271.0086
+Target range: [0.0000 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-12T22:04:08.133548 ---
+Phase: Standard
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 281.1868
+Target range: [210.8901 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-12T22:04:09.253725 ---
+Phase: Steering (Relaxed)
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 281.1868
+Target range: [0.0000 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-12T22:06:39.574444 ---
+Phase: Standard
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 292.7341
+Target range: [219.5505 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-12T22:06:40.664003 ---
+Phase: Steering (Relaxed)
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 292.7341
+Target range: [0.0000 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-13T08:04:42.607821 ---
+Phase: Standard
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 276.0426
+Target range: [207.0319 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-13T08:04:44.403858 ---
+Phase: Steering (Relaxed)
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 276.0426
+Target range: [0.0000 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-13T08:07:03.557134 ---
+Phase: Standard
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 276.7637
+Target range: [207.5728 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-13T08:07:04.704422 ---
+Phase: Steering (Relaxed)
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 276.7637
+Target range: [0.0000 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-13T08:09:12.177031 ---
+Phase: Standard
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 277.4144
+Target range: [208.0608 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-13T08:09:13.154627 ---
+Phase: Steering (Relaxed)
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 277.4144
+Target range: [0.0000 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-13T08:11:37.547679 ---
+Phase: Standard
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 282.4289
+Target range: [211.8217 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-13T08:11:39.058165 ---
+Phase: Steering (Relaxed)
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 282.4289
+Target range: [0.0000 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-13T08:13:52.497768 ---
+Phase: Standard
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 292.3087
+Target range: [219.2315 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-13T08:13:54.021812 ---
+Phase: Steering (Relaxed)
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 292.3087
+Target range: [0.0000 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-13T08:16:07.731071 ---
+Phase: Standard
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 294.3972
+Target range: [220.7979 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-13T08:16:08.805309 ---
+Phase: Steering (Relaxed)
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 294.3972
+Target range: [0.0000 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-13T08:18:42.581028 ---
+Phase: Standard
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 290.8656
+Target range: [218.1492 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-13T08:18:43.735652 ---
+Phase: Steering (Relaxed)
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 290.8656
+Target range: [0.0000 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-13T08:21:10.272323 ---
+Phase: Standard
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 297.7571
+Target range: [223.3178 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-13T08:21:11.397382 ---
+Phase: Steering (Relaxed)
+Rejected at tag: Kiln motor 1 Amps
+Current RT value: 297.7571
+Target range: [0.0000 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-13T08:23:37.462526 ---
+Phase: Standard
+Rejected at tag: Kiln feed
+Current RT value: 275.4479
+Target range: [206.5859 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-13T08:23:38.131420 ---
+Phase: Steering (Relaxed)
+Rejected at tag: Kiln feed
+Current RT value: 275.4479
+Target range: [0.0000 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-13T08:26:03.772994 ---
+Phase: Standard
+Rejected at tag: Kiln feed
+Current RT value: 276.6564
+Target range: [207.4923 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-13T08:26:04.444249 ---
+Phase: Steering (Relaxed)
+Rejected at tag: Kiln feed
+Current RT value: 276.6564
+Target range: [0.0000 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-13T08:28:30.140703 ---
+Phase: Standard
+Rejected at tag: Kiln feed
+Current RT value: 276.1510
+Target range: [207.1132 to 100.0000]
+Config Limits: [0.0 to 100.0]
+
+--- 2026-05-13T08:28:30.817616 ---
+Phase: Steering (Relaxed)
+Rejected at tag: Kiln feed
+Current RT value: 276.1510
+Target range: [0.0000 to 100.0000]
+Config Limits: [0.0 to 100.0]
