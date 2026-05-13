@@ -6,7 +6,7 @@ import {updateOpSummaryActions} from "../optSum/updateOpSummaryActions.js";
 import {updateOpSummaryActionsKiln} from "../optSum/optSumkiln/updateOpSummaryActionsKiln.js";
 import {updateOpSummaryActionsPreheater} from "../optSum/optSumPreheater/updateOpSummaryActionsPreheater.js";
 import {updateOpSummaryActionsCooler} from "../optSum/optSumCooler/updateOpSummaryActionsCooler.js";
-export async function toggleHybridSystem() {
+export async function toggleHybridSystem(forceState = null) {
     const btn = document.getElementById('btn-hybrid-engage');
     const statusEl = document.getElementById('hybrid-status-text');
     const indicator = document.getElementById('fp-active-indicator');
@@ -17,7 +17,11 @@ export async function toggleHybridSystem() {
     
     const isTest = document.getElementById('test-mode-toggle').checked;
 
-    state.isHybridEngaged = !state.isHybridEngaged;
+    if (forceState !== null) {
+        state.isHybridEngaged = forceState;
+    } else {
+        state.isHybridEngaged = !state.isHybridEngaged;
+    }
 
     if (state.isHybridEngaged) {
         btn.innerText = "DISENGAGE SYSTEM";

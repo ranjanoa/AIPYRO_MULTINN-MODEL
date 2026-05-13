@@ -1,3 +1,4 @@
+import { state } from "../../inits/state.js";
 export function HybridControl() {
     const container = document.createElement("div");
     container.className = "hybrid-control-container grid grid-cols-12 gap-4 h-full w-full transition-grid";
@@ -233,10 +234,22 @@ export function HybridControl() {
 
         cards.forEach((card) => {
             card.addEventListener("click", () => {
-                if (container.querySelector("#btn-hybrid-engage").innerText.includes("DISENGAGE")) return;
                 modeSelector(card.dataset.mode);
+                // If already engaged, trigger the update immediately to backend
+                if (state.isHybridEngaged) {
+                    Actions.toggleHybridSystem(true);
+                }
             });
         });
+
+        const baseModeSelector = container.querySelector("#ai-mnm-base-mode");
+        if (baseModeSelector) {
+            baseModeSelector.addEventListener("change", () => {
+                if (state.isHybridEngaged) {
+                    Actions.toggleHybridSystem(true);
+                }
+            });
+        }
 
         // Apply default selection ONLY if none was restored by the system state
         setTimeout(() => {

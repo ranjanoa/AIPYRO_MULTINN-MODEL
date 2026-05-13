@@ -247,6 +247,8 @@ def automated_control_loop():
 
     # PERSISTENCE TIMER: Tracks how long scores have been below threshold
     _low_trust_timer = 0
+    _last_mode_state = -1
+    _last_base_strat = ""
 
     # Persistent storage for recommendation to ensure UI stays updated 
     # even between 30-second AI optimization cycles.
@@ -255,14 +257,29 @@ def automated_control_loop():
     while True:
         try:
             # 1. READ GLOBAL STATE
-            current_mode = getattr(config, 'CONTROL_MODE', 0)
+            original_mode = getattr(config, 'CONTROL_MODE', 0)
+            
+            # Detect mode change to force immediate calculation
+            current_base_strat = getattr(config, 'AI_MNM_BASE_STRATEGY', 'FINGERPRINT')
+            if original_mode != _last_mode_state or (original_mode == 4 and current_base_strat != _last_base_strat):
+                logger.info(f"[MODE-SWITCH] Detected change (Mode: {original_mode}, Base: {current_base_strat}). Forcing immediate cycle.")
+                _last_mode_state = original_mode
+                _last_base_strat = current_base_strat
+                loop_counter = AI_INTERVAL_SECONDS # Force immediate slow cycle
+                # Reset recommendation to show "SWITCHING..."
+                recommendation = {
+                    "active_strategy": "SWITCHING...", 
+                    "driver": "SWITCHING...", 
+                    "actions": [],
+                    "match_score": 0,
+                    "system_trust": 0
+                }
 
             # AI_MNM is mode 4 — it is an OVERLAY: the base engine (Fingerprint /
             # AI / Hybrid) generates a full recommendation, then we overwrite the
             # CV setpoints with values read from cimpor_data_result. We map mode 4
             # to the chosen base mode for computing the recommendation and remember
             # the overlay flag so the post-processing block can apply the override.
-            original_mode = getattr(config, 'CONTROL_MODE', 0)
             current_mode = original_mode
 
             ai_mnm_overlay_active = (original_mode == 4)
@@ -421,33 +438,7 @@ def automated_control_loop():
                         ai_score = float(ai_rec.get('confidence', 0)) if ai_rec and ai_rec.get('confidence') is not None else 0
 
                         # --- STRATEGY ARBITRATION ---
-                        if current_mode == 3:  # HYBRID
-                            # Arbitration logic (History Bias)
-                            if (fp_score + trust_thresholds.get('hybrid_bias', 5.0)) >= ai_score:
-                                recommendation = fp_rec
-                                if recommendation:
-                                    recommendation['active_strategy'] = "FINGERPRINT"
-                                    recommendation['driver'] = "HISTORY"
-                            elif ai_rec:
-                                recommendation = ai_rec
-                                if recommendation:
-                                    recommendation['active_strategy'] = "AI"
-                                    recommendation['driver'] = "AI-NN"
-                                    # ATTACH FINGERPRINT DATA FOR UI GROUNDING
-                                    if fp_rec and 'match_meta' in fp_rec:
-                                        recommendation['match_meta'] = fp_rec['match_meta']
-                            else:
-                                recommendation = fp_rec
-                                if recommendation:
-                                    recommendation['driver'] = "HISTORY"
-                        
-                        elif current_mode == 2:  # FINGERPRINT ONLY
-                            recommendation = fp_rec
-                            if recommendation:
-                                recommendation['active_strategy'] = "FINGERPRINT"
-                                recommendation['driver'] = "HISTORY"
-                        
-                        elif current_mode == 3:  # HYBRID AUTO-ARBITRATION
+                        if current_mode == 3:  # HYBRID AUTO-ARBITRATION
                             # Compare FP Score (with bias) vs AI Score
                             bias = float(trust_thresholds.get('hybrid_bias', 5.0))
                             if (fp_score + bias) >= ai_score:
@@ -460,9 +451,21 @@ def automated_control_loop():
                                 if recommendation:
                                     recommendation['active_strategy'] = "HYBRID-AI"
                                     recommendation['driver'] = "AI-NN"
+                                    # ATTACH FINGERPRINT DATA FOR UI GROUNDING
+                                    if fp_rec and 'match_meta' in fp_rec:
+                                        recommendation['match_meta'] = fp_rec['match_meta']
                             else:
                                 recommendation = fp_rec
-
+                                if recommendation:
+                                    recommendation['active_strategy'] = "FINGERPRINT"
+                                    recommendation['driver'] = "HISTORY-FALLBACK"
+                        
+                        elif current_mode == 2:  # FINGERPRINT ONLY
+                            recommendation = fp_rec
+                            if recommendation:
+                                recommendation['active_strategy'] = "FINGERPRINT"
+                                recommendation['driver'] = "HISTORY"
+                        
                         elif current_mode == 1:  # AI ONLY
                             if ai_rec:
                                 recommendation = ai_rec
@@ -478,37 +481,6 @@ def automated_control_loop():
                                 if recommendation:
                                     recommendation['active_strategy'] = "FINGERPRINT" 
                                     recommendation['driver'] = "HISTORY-FALLBACK"
-                        
-                        elif current_mode == 4:  # AI_MNM (Overlay Mode)
-                            # Choose the base engine for non-overridden parameters
-                            base_type = getattr(config, 'AI_MNM_BASE_STRATEGY', 'FINGERPRINT')
-                            
-                            if base_type == 'AI':
-                                recommendation = ai_rec or fp_rec
-                                if recommendation:
-                                    recommendation['active_strategy'] = "AI"
-                                    recommendation['driver'] = "AI-NN (MNM-Base)"
-                            elif base_type == 'HYBRID':
-                                # Re-run standard Hybrid arbitration
-                                if (fp_score + trust_thresholds.get('hybrid_bias', 5.0)) >= ai_score:
-                                    recommendation = fp_rec
-                                    if recommendation:
-                                        recommendation['active_strategy'] = "FINGERPRINT"
-                                        recommendation['driver'] = "HISTORY (MNM-Base)"
-                                elif ai_rec:
-                                    recommendation = ai_rec
-                                    if recommendation:
-                                        recommendation['active_strategy'] = "AI"
-                                        recommendation['driver'] = "AI-NN (MNM-Base)"
-                                else:
-                                    recommendation = fp_rec
-                            else: # Default to FINGERPRINT
-                                recommendation = fp_rec
-                                if recommendation:
-                                    recommendation['active_strategy'] = "FINGERPRINT"
-                                    recommendation['driver'] = "HISTORY (MNM-Base)"
-                            
-                            ai_mnm_overlay_active = True
 
                         # Scores attached — final broadcast happens after nudge finalization below.
                         # (Removed early emit here to ensure UI always matches what is written to DB)

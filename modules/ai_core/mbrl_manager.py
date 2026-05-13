@@ -12,6 +12,9 @@ if hasattr(sys.stdout, 'reconfigure'):
 
 from datetime import datetime
 from torch.utils.data import DataLoader, Dataset, TensorDataset
+import logging
+
+logger = logging.getLogger("AI-CORE")
 
 # --- PATH SETUP ---
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
@@ -385,8 +388,7 @@ def get_optimal_action(current_real_df):
     # >>> SANITIZATION ADDITION: Catch missing tags to prevent AI crash <<<
     if current_real_df.isna().any().any():
         missing_cols = current_real_df.columns[current_real_df.isna().any()].tolist()
-        print(f"⚠️ WARNING: Missing data from OPC UA for tags: {missing_cols}")
-        print("Forward-filling to keep AI stable...")
+        logger.warning(f"[AI-DATA] Missing/NaN data detected for {len(missing_cols)} tags: {missing_cols[:5]}...")
         current_real_df = current_real_df.ffill().fillna(0.0)
 
     full_config = process_model.load_model_config()
@@ -438,9 +440,19 @@ def get_optimal_action(current_real_df):
 
     # Safety catch for the numpy array to prevent PyTorch crashes
     if np.isnan(obs).any() or np.isinf(obs).any():
-        print("⚠️ WARNING: Invalid values (NaN/Inf) detected in observation array! Sanitizing...")
+        logger.warning("[AI-DATA] Invalid values (NaN/Inf) detected in observation array! Sanitizing...")
         obs = np.nan_to_num(obs, nan=0.0, posinf=1e6, neginf=-1e6)
 
+    # --- ADVANCED DIAGNOSTIC LOGGING ---
+    # We check for the 'Normalization Explosion' that causes 0% confidence
+    out_of_bounds = []
+    for i, val in enumerate(norm_s[-1]):
+        if abs(val) > 5.0:
+            out_of_bounds.append(f"{s_cols[i]}:{val:.1f}")
+    
+    if out_of_bounds:
+        logger.warning(f"[AI-DIAG] NORMALIZATION EXPLOSION! {len(out_of_bounds)} sensors far from training range: {', '.join(out_of_bounds[:5])}")
+    
     obs_tensor = torch.FloatTensor(obs).unsqueeze(0).to(device)
 
     strat_name = full_config.get('active_strategy', 'BALANCED')
@@ -473,6 +485,8 @@ def get_optimal_action(current_real_df):
             val_confidence = 0.0
         else:
             val_confidence = max(0.0, min(100.0, 100.0 * np.exp(-raw_var * 5.0)))
+            
+        logger.info(f"[AI-NN] Confidence: {val_confidence:.1f}% | Raw Uncertainty: {raw_var:.4f}")
             
         # PROJECT PRIMARY TARGET
         pred_temps = predict_soft_sensor_rollout(current_real_df, target_var_name, steps=15)
