@@ -119,7 +119,7 @@ def write_setpoints(timestamp, setpoints_dict, setpoint_tag_map, scale_factors):
         client.close()
 
 
-def get_aimnm_results(window_minutes=2):
+def get_aimnm_results(window_minutes=2, measurement_override=None):
     """
     Reads the latest record from `cimpor_data_result` (DB_MEASUREMENT_AI_MNM_RESULT).
     Returns a flat dict {field_name: float_value, _time: ISO} — frontend pairs
@@ -129,10 +129,11 @@ def get_aimnm_results(window_minutes=2):
     if not client:
         return {}
     try:
+        measurement = measurement_override or config.DB_MEASUREMENT_AI_MNM_RESULT
         query = f'''
         from(bucket: "{config.DB_BUCKET}")
           |> range(start: -{int(window_minutes)}m)
-          |> filter(fn: (r) => r["_measurement"] == "{config.DB_MEASUREMENT_AI_MNM_RESULT}")
+          |> filter(fn: (r) => r["_measurement"] == "{measurement}")
           |> last()
           |> pivot(rowKey:["_time"], columnKey:["_field"], valueColumn:"_value")
         '''
@@ -162,17 +163,13 @@ def get_aimnm_results(window_minutes=2):
         client.close()
 
 
-def get_kiln1_latest_fields(field_names, window_minutes=5):
+def get_live_current_values(field_names, window_minutes=5):
     """
-    Reads the latest values for the given field_names from the `kiln1`
-    (DB_MEASUREMENT) measurement.
-
-    AI_MNM uses this to populate the right-side Live Sensors panel. Field
-    names are passed through verbatim (case-sensitive, including spaces and
-    parentheses) because the AI engine writes them that way.
-
-    Returns: { field_name: float_value, _time: ISO } — fields that don't
-    exist on the latest point are simply omitted.
+    Reads the latest values for the given field_names by scanning multiple
+    measurements: kiln1, kiln1_opc, and kiln1_pi.
+    
+    Returns: { field_name: float_value } - returns the most recent point found
+    across all sources.
     """
     if not field_names:
         return {}
@@ -180,15 +177,20 @@ def get_kiln1_latest_fields(field_names, window_minutes=5):
     if not client:
         return {}
     try:
+        measurements = [config.DB_MEASUREMENT, config.DB_MEASUREMENT_OPC, config.DB_MEASUREMENT_PI]
         filter_clause = " or ".join(
             f'r["_field"] == "{str(fn).replace(chr(34), chr(92) + chr(34))}"'
             for fn in field_names
         )
+        
+        # We query all 3 measurements in one Flux call
         query = f'''
         from(bucket: "{config.DB_BUCKET}")
           |> range(start: -{int(window_minutes)}m)
-          |> filter(fn: (r) => r["_measurement"] == "{config.DB_MEASUREMENT}")
+          |> filter(fn: (r) => r["_measurement"] == "{measurements[0]}" or r["_measurement"] == "{measurements[1]}" or r["_measurement"] == "{measurements[2]}")
           |> filter(fn: (r) => {filter_clause})
+          |> last()
+          |> group(columns: ["_field"])
           |> last()
           |> pivot(rowKey:["_time"], columnKey:["_field"], valueColumn:"_value")
         '''

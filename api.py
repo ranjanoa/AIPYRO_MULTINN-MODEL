@@ -420,6 +420,16 @@ def get_aimnm_values():
         ts = cdr.pop('_time', None)
         cdr_keys_lower = {k.lower(): k for k in cdr.keys()}
 
+        # --- MEASUREMENT NAME SAFETY CHECK ---
+        # Try primary config name, but fallback to singular if plural (or vice-versa) if empty
+        if not cdr:
+            alt_measurement = "cimpor_data_result" if config.DB_MEASUREMENT_AI_MNM_RESULT.endswith('s') else config.DB_MEASUREMENT_AI_MNM_RESULT + 's'
+            cdr = database.get_aimnm_results(window_minutes=10, measurement_override=alt_measurement) or {}
+            if cdr:
+                print(f"[AI_MNM] Data found in alternate measurement: {alt_measurement}")
+                ts = cdr.pop('_time', None)
+                cdr_keys_lower = {k.lower(): k for k in cdr.keys()}
+
         def _resolve(field_name):
             if not field_name:
                 return None
@@ -433,31 +443,29 @@ def get_aimnm_values():
                     return cdr_keys_lower[cand]
             return None
 
-        # --- LIVE PLC FALLBACK ---
-        # If cimpor_data_result is missing Curr values, we fetch them from live kiln1
+        # --- STRICT SOURCE ROUTING ---
+        # 1. Current Values: ALWAYS from live PLC (kiln1/opc/pi)
         missing_cv_vars = [spec.get('target_var') for spec in cv_spec.values() if spec.get('target_var')]
-        live_kiln1 = database.get_kiln1_latest_fields(missing_cv_vars, window_minutes=10) or {}
+        live_kiln1 = database.get_live_current_values(missing_cv_vars, window_minutes=10) or {}
 
+        # 2. Target Values: ALWAYS from AI database results (cdr)
         values = {}
         missing = []
         for param, spec in cv_spec.items():
-            curr_field = spec.get('curr_field')
+            curr_field = spec.get('curr_field') # This is the label in the DB
             sp_field   = spec.get('sp_field')
-            target_var = spec.get('target_var')
+            target_var = spec.get('target_var') # This is the tag in kiln1
 
             row = {}
-            curr_resolved = _resolve(curr_field)
-            sp_resolved   = _resolve(sp_field)
-
-            # Try to get Curr from AI results first, fallback to Live PLC
-            if curr_resolved:
-                row['curr'] = cdr[curr_resolved]
-            elif target_var in live_kiln1:
+            
+            # CURR comes from Live PLC
+            if target_var in live_kiln1:
                 row['curr'] = live_kiln1[target_var]
             else:
-                missing.append(curr_field)
+                missing.append(target_var)
 
-            # SP only comes from AI results
+            # SP comes from AI Results
+            sp_resolved = _resolve(sp_field)
             if sp_resolved:
                 row['sp'] = cdr[sp_resolved]
             else:
@@ -466,7 +474,7 @@ def get_aimnm_values():
             values[param] = row
 
         if missing:
-            print(f"[AI_MNM] Missing fields in cimpor_data_result ({len(missing)}): {missing[:6]}{'...' if len(missing)>6 else ''}")
+            print(f"[AI_MNM] Missing strictly-routed fields ({len(missing)}): {missing[:6]}{'...' if len(missing)>6 else ''}")
 
         try:
             mirrored = database.mirror_aimnm_cv_to_kiln2(values)
@@ -475,31 +483,19 @@ def get_aimnm_values():
         except Exception as mirror_err:
             print(f"[AI_MNM] kiln2 mirror failed: {mirror_err}")
 
-        # Indicators — configured + any remaining raw fields from cimpor_data_result
+        # Indicators — ALWAYS from live PLC (kiln1/opc/pi)
         indicators = {}
-        consumed_fields = set()
+        
+        # Gather target vars for indicators
+        ind_target_vars = [spec.get('field') for spec in ind_spec.values() if spec.get('field')]
+        live_ind_kiln1 = database.get_live_current_values(ind_target_vars, window_minutes=10) or {}
+
         for key, spec in ind_spec.items():
             field = spec.get('field') or key
-            resolved = _resolve(field)
-            if resolved is not None:
-                indicators[key] = {'curr': cdr[resolved]}
-                consumed_fields.add(resolved)
+            if field in live_ind_kiln1:
+                indicators[key] = {'curr': live_ind_kiln1[field]}
             else:
                 indicators[key] = {}
-
-        cv_field_names = set()
-        for spec in cv_spec.values():
-            for fk in ('curr_field', 'sp_field'):
-                fv = spec.get(fk)
-                if fv:
-                    r = _resolve(fv)
-                    if r:
-                        cv_field_names.add(r)
-
-        for raw_field, raw_val in cdr.items():
-            if raw_field in consumed_fields or raw_field in cv_field_names:
-                continue
-            indicators[raw_field] = {'curr': raw_val}
 
         return jsonify({"timestamp": ts, "values": values, "indicators": indicators})
     except Exception as e:
