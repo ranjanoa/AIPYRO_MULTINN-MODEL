@@ -83,6 +83,7 @@ export function updateOpSummaryActions(data) {
                 parseFloat(act.current_setpoint || 0);
 
             const finalTarget = parseFloat(act.fingerprint_set_point || 0);
+            const backendNudge = act.nudge_target !== undefined ? parseFloat(act.nudge_target) : null;
 
             const varConf = state.currentModelConfig.control_variables[act.var_name];
             const gain = varConf ? (Math.abs(parseFloat(varConf.nudge_speed)) || 0.15) : 1.0;
@@ -92,9 +93,10 @@ export function updateOpSummaryActions(data) {
             const minPush = span < 10000 ? (span * 0.05) : 0.1;
             
             const gap = finalTarget - liveCurr;
-            let nudgedTarget = finalTarget;
+            let nudgedTarget = backendNudge !== null ? backendNudge : finalTarget;
             
-            if (Math.abs(gap) > 0.001) {
+            // Fallback calculation only if backend didn't provide a nudge
+            if (backendNudge === null && Math.abs(gap) > 0.001) {
                 const moveRequest = Math.max(Math.abs(gap * gain), minPush);
                 nudgedTarget = liveCurr + Math.sign(gap) * Math.min(moveRequest, Math.abs(gap));
             }
