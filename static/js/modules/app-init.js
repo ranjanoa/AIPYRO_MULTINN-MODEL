@@ -1,4 +1,4 @@
-import { MOCK_CONFIG } from "../inits/config.js"
+import { MOCK_CONFIG } from "../inits/app_config.js"
 import { initRealTimeList } from "../InitFunctions/initRealTimeList.js"
 import { initTrendDropdown } from "../InitFunctions/initTrendDropdown.js"
 import { initSimulatorControls } from "../InitFunctions/initSimulatorControls.js"

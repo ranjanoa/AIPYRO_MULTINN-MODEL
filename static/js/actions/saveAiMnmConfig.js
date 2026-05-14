@@ -1,5 +1,5 @@
 import { state } from "../inits/state.js";
-import { MOCK_CONFIG } from "../inits/config.js";
+import { MOCK_CONFIG } from "../inits/app_config.js";
 
 // Harvest one of the AI_MNM tables into a JS object keyed by parameter name.
 function harvest(rowType) {

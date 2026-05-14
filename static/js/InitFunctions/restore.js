@@ -1,4 +1,4 @@
-import { MOCK_CONFIG } from "../inits/config.js"
+import { MOCK_CONFIG } from "../inits/app_config.js"
  import { state } from "../inits/state.js";
 import {updateAutoButtonUI} from "../updateFunctions/updateAutoButtonUI.js"
 export async function restoreState() {

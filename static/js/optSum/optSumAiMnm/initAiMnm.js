@@ -1,5 +1,5 @@
 import { state } from "../../inits/state.js";
-import { MOCK_CONFIG } from "../../inits/config.js";
+import { MOCK_CONFIG } from "../../inits/app_config.js";
 import { updateAiMnm } from "./updateAiMnm.js";
 import { updateAiMnmLive } from "./updateAiMnmLive.js";
 

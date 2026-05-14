@@ -1,4 +1,4 @@
-import { MOCK_CONFIG } from "../inits/config.js";
+import { MOCK_CONFIG } from "../inits/app_config.js";
 export async function runSimulation() {
     const checked = Array.from(document.querySelectorAll('.sim-check:checked')).map(cb => cb.value);
     if (checked.length < 2) return alert("Select 2+ vars");

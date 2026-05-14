@@ -1,4 +1,4 @@
-import {MOCK_CONFIG} from "../inits/config.js";
+import {MOCK_CONFIG} from "../inits/app_config.js";
 
 export async function saveConfig() {
     await fetch(`${MOCK_CONFIG.API_URL}/api/config`, {

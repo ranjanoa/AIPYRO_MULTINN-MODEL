@@ -1,5 +1,5 @@
 import {state} from "../inits/state.js";
-import {MOCK_CONFIG} from "../inits/config.js";
+import {MOCK_CONFIG} from "../inits/app_config.js";
 import {refreshBatchListUI} from "./refreshBatchListUI.js";
 import {updateAutoButtonUI} from "../updateFunctions/updateAutoButtonUI.js";
 import {updateOpSummaryActions} from "../optSum/updateOpSummaryActions.js";

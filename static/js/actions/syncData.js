@@ -1,4 +1,4 @@
-import {MOCK_CONFIG} from "../inits/config.js";
+import {MOCK_CONFIG} from "../inits/app_config.js";
 
 export async function syncData() {
     fetch(`${MOCK_CONFIG.API_URL}/api/history/sync`, {method: 'POST'});

@@ -1,5 +1,5 @@
 import {state} from "../inits/state.js";
-import {MOCK_CONFIG} from "../inits/config.js";
+import {MOCK_CONFIG} from "../inits/app_config.js";
 import {displayRecs} from "./displayRecs.js";
 import {selectRec} from "./selectRec.js";
 

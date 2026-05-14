@@ -1,4 +1,4 @@
-import { MOCK_CONFIG } from "../inits/config.js"
+import { MOCK_CONFIG } from "../inits/app_config.js"
 import { updateLiveUI } from "../updateFunctions/updateLiveUI.js";
 import { updateHybridLive } from "../updateFunctions/updateHybridLive.js";
 import { updateMbrlLive } from "../updateFunctions/updateMbrlLive.js";

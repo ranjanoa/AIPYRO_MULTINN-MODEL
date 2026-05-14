@@ -1,5 +1,5 @@
 import { state } from "../inits/state.js";
-import { MOCK_CONFIG } from "../inits/config.js";
+import { MOCK_CONFIG } from "../inits/app_config.js";
 
 export async function saveTableConfig() {
     //  const cfg = JSON.parse(JSON.stringify(state.currentModelConfig));

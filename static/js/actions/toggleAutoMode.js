@@ -1,6 +1,6 @@
 import {state} from "../inits/state.js";
 import {updateAutoButtonUI} from "../updateFunctions/updateAutoButtonUI.js"
-import {MOCK_CONFIG} from "../inits/config.js";
+import {MOCK_CONFIG} from "../inits/app_config.js";
 
 export async function toggleAutoMode(e) {
     if (state.isHybridEngaged) return; // Locked while active

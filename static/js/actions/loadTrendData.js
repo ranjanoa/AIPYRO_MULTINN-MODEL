@@ -1,4 +1,4 @@
-import {MOCK_CONFIG} from "../inits/config.js";
+import {MOCK_CONFIG} from "../inits/app_config.js";
 import {state} from "../inits/state.js";
 
 export async function loadTrendData(tag) {
