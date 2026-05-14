@@ -86,7 +86,8 @@ class PessimisticVirtualEnv:
             mean_delta, _ = self.wm.predict(inp_tensor)
 
         delta = mean_delta.cpu().numpy()[0]
-        next_norm_s = self.last_norm_s + delta
+        # --- SCALING FIX: World Model was trained on delta * 100.0 ---
+        next_norm_s = self.last_norm_s + (delta / 100.0)
         
         # --- STABILITY FIX: Sanitize and clip the dream state ---
         next_norm_s = np.nan_to_num(next_norm_s, nan=0.0)

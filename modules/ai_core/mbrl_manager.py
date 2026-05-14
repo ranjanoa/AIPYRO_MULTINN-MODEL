@@ -270,7 +270,8 @@ def predict_soft_sensor_rollout(current_real_df, pred_var_name, steps=60):
             mean_delta, _ = _world_model.predict(inp_tensor)
 
         delta = mean_delta.cpu().numpy()[0]
-        next_norm_state = current_norm_state + delta
+        # --- SCALING FIX: World Model was trained on delta * 100.0 ---
+        next_norm_state = current_norm_state + (delta / 100.0)
 
         # --- INDUSTRIAL CLAMPING (Rollout Stabilization) ---
         # We denormalize, clamp to physical limits, then re-normalize.
@@ -361,7 +362,8 @@ def simulate_what_if(history_df, manual_controls, target_var, steps=60):
                 mean_delta, _ = _world_model.predict(inp)
 
             delta = mean_delta.cpu().numpy()[0]
-            next_norm_state = current_norm_state + delta
+            # --- SCALING FIX: World Model was trained on delta * 100.0 ---
+            next_norm_state = current_norm_state + (delta / 100.0)
 
             # --- INDUSTRIAL CLAMPING (Sim Stabilization) ---
             s_stats = _env_config['stats']['state']
