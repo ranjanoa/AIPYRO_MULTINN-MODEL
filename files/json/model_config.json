@@ -1759,7 +1759,7 @@
         "enabled": false
     },
     "reactive_governor": {
-        "active_step_pct": 0.1,
+        "active_step_pct": 0.05,
         "blockers": [
             {
                 "limit": 10000,
@@ -1770,9 +1770,7 @@
         "zones": [
             {
                 "name": "Kiln",
-                "opt_fuels": [
-                    "RDF (Kiln)"
-                ],
+                "opt_fuels": [],
                 "rescue_fuels": [
                     "Petcoke (Kiln)"
                 ],
@@ -1782,10 +1780,7 @@
             },
             {
                 "name": "Precalciner",
-                "opt_fuels": [
-                    "RDF 1 (PC)",
-                    "RDF 2 (PC)"
-                ],
+                "opt_fuels": [],
                 "rescue_fuels": [
                     "Petcoke (PC)"
                 ],
