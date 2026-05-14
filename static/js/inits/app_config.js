@@ -1,6 +1,6 @@
 export const MOCK_CONFIG = Object.freeze({
-    // VERSION: 2026-05-15_00:09 (FORCE IP)
-    API_URL: 'http://10.1.250.1:5000',
+    // SMART CONNECTION: Automatically detects if it's local or network access
+    API_URL: (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? '' : window.location.origin,
 
     config: {
         "model_name": "NEXUS-V4 Simulator",
