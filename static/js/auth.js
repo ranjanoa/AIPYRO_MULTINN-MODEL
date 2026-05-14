@@ -105,19 +105,27 @@ export function applyRoleAccess() {
         },
 
         manager: {
-            disable: ["panel-config",
-                "panel-simulator",
-                "panel-dashboard",
-                "panel-hybrid",
-                "panel-softsensor",
-                "panel-mbrl",
-                "panel-softsensor-sim",
-                "panel-trends"]
+            disable: [
+                "panel-config", "nav-config",
+                "panel-simulator", "nav-simulator",
+                "account",
+                "panel-hybrid", "nav-hybrid",
+                "panel-fingerprint", "nav-fingerprint",
+                "panel-softsensor", "nav-softsensor",
+                "panel-mbrl", "nav-mbrl",
+                "panel-softsensor-sim", "nav-softsensor-sim",
+                "panel-trends", "nav-trends",
+                "panel-op-kiln", "nav-op-kiln",
+                "panel-op-preheater", "nav-op-preheater",
+                "panel-op-cooler", "nav-op-cooler",
+                "panel-ai-mnm", "nav-ai-mnm"
+            ]
         },
 
         operator: {
             disable: [
                 "panel-config",
+                "nav-config"
             ]
         }
     };
