@@ -95,6 +95,10 @@ export function initSocket() {
 
         // STORE DATA ONLY (NO UI UPDATE HERE)
         socket.on('live_values', (data) => {
+            // DIAGNOSTIC: Print raw data to console for machine-to-machine comparison
+            if (Math.random() > 0.95) { // Log every ~10 seconds to avoid flooding
+                console.log("[DIAGNOSTIC] Raw Telemetry from Server:", data);
+            }
             state.dataFlow.lastDataTime = Date.now();
             state.latestLiveValues = { ...state.latestLiveValues, ...data };
             latestLiveData = data;
