@@ -103,6 +103,7 @@ template_dir = os.path.join(config.BASE_DIR, 'templates')
 static_dir = os.path.join(config.BASE_DIR, 'static')
 
 app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 app.config.from_object('config')
 socketio = SocketIO(app, 
                     cors_allowed_origins="*", 
