@@ -125,7 +125,9 @@ export function applyRoleAccess() {
         operator: {
             disable: [
                 "panel-config",
-                "nav-config"
+                "nav-config",
+                "panel-ai-mnm",
+                "nav-ai-mnm"
             ]
         }
     };
