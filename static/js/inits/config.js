@@ -1,5 +1,5 @@
 export const MOCK_CONFIG = Object.freeze({
-    API_URL: window.location.origin,
+    API_URL: '',
 
     config: {
         "model_name": "NEXUS-V4 Simulator",
