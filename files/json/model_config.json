@@ -1776,8 +1776,8 @@
                 "rescue_fuels": [
                     "Petcoke (Kiln)"
                 ],
-                "temp_max": 1400,
-                "temp_min": 1200,
+                "temp_max": 1412,
+                "temp_min": 1238,
                 "temp_tag": "Kiln BZT1"
             },
             {
@@ -1789,8 +1789,8 @@
                 "rescue_fuels": [
                     "Petcoke (PC)"
                 ],
-                "temp_max": 1028,
-                "temp_min": 902,
+                "temp_max": 1062,
+                "temp_min": 888,
                 "temp_tag": "PC outlet T1"
             }
         ]
