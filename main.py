@@ -503,7 +503,7 @@ def automated_control_loop():
                         raw_actions = recommendation.get('actions', [])
                         
                         calc_actions = process_model.generate_calculated_actions(
-                            raw_actions, mapped_state, controls_cfg, indicators_cfg, calc_cfg
+                            raw_actions, mapped_state, controls_cfg, indicators_cfg, calc_cfg, recommendation
                         )
                         
                         # Replace naive generic actions with the fully calculated ones

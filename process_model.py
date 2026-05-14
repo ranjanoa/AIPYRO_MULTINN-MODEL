@@ -304,8 +304,11 @@ def materialize_df(df, controls_cfg, indicators_cfg, calc_vars_cfg):
                 enriched_df[friendly_name] = enriched_df[friendly_name].fillna(0.0)
     return enriched_df
 
-def generate_calculated_actions(raw_actions, state_map, controls_cfg, indicators_cfg, calc_vars_cfg):
-    """Generates 'Action' objects for derived variables with built-in safety nudging."""
+def generate_calculated_actions(raw_actions, state_map, controls_cfg, indicators_cfg, calc_vars_cfg, recommendation=None):
+    """
+    Generates 'Action' objects for derived variables with built-in safety nudging.
+    Now incorporates AI Predictions and Fingerprint Match data for 'Virtual Targets'.
+    """
     if not calc_vars_cfg: return []
     
     full_conf = load_model_config()
@@ -316,6 +319,20 @@ def generate_calculated_actions(raw_actions, state_map, controls_cfg, indicators
     target_context = state_map.copy()
     # 2. NUDGE CONTEXT (The immediate commanded step)
     nudge_context = state_map.copy()
+
+    # 3. AI/FINGERPRINT PREDICTION INJECTION
+    # If we have a recommendation, we use its 'predicted_state' (for NN) 
+    # or 'match_meta' (for Fingerprint) to ground our 'Target' calculations.
+    if recommendation:
+        # Use NN Predicted State if available
+        pred_state = recommendation.get('predicted_state')
+        if pred_state:
+            target_context.update(pred_state)
+        
+        # Use Fingerprint Historical State if available
+        match_meta = recommendation.get('match_meta')
+        if match_meta:
+            target_context.update(match_meta)
 
     for action in raw_actions:
         # Use absolute targets for the final goal
