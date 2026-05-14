@@ -300,6 +300,94 @@
             "nudge_speed": 0.05,
             "op_summary": true,
             "unit": "%"
+        },
+        "TRG - Calciner Outlet T": {
+            "default_max": 1100,
+            "default_min": 850,
+            "description": "AI Target: Calciner Outlet Temp",
+            "formula": "`PC outlet T1`",
+            "friendly_name": "TRG - Calciner Outlet T",
+            "is_setpoint": true,
+            "nudge_speed": 1.0,
+            "op_summary": true,
+            "unit": "°C"
+        },
+        "TRG - Tertiary Air dP": {
+            "default_max": 20,
+            "default_min": 0,
+            "description": "AI Target: Tertiary Air Duct dP",
+            "formula": "`Tert air duct dP (calc)` or 0",
+            "friendly_name": "TRG - Tertiary Air dP",
+            "is_setpoint": true,
+            "nudge_speed": 1.0,
+            "op_summary": true,
+            "unit": "mbar"
+        },
+        "TRG - Cyclone C4 Max T": {
+            "default_max": 1000,
+            "default_min": 700,
+            "description": "AI Target: Cyclone C4 Max Gas T",
+            "formula": "max(`C4N gas T`, `C4P gas T`)",
+            "friendly_name": "TRG - Cyclone C4 Max T",
+            "is_setpoint": true,
+            "nudge_speed": 1.0,
+            "op_summary": true,
+            "unit": "°C"
+        },
+        "TRG - Kiln Inlet O2": {
+            "default_max": 10,
+            "default_min": 0,
+            "description": "AI Target: Kiln Inlet O2",
+            "formula": "`O2 (C3)`",
+            "friendly_name": "TRG - Kiln Inlet O2",
+            "is_setpoint": true,
+            "nudge_speed": 1.0,
+            "op_summary": true,
+            "unit": "%"
+        },
+        "TRG - Kiln NOx": {
+            "default_max": 1500,
+            "default_min": 0,
+            "description": "AI Target: Kiln NOx Emissions",
+            "formula": "`NOx (Kiln)`",
+            "friendly_name": "TRG - Kiln NOx",
+            "is_setpoint": true,
+            "nudge_speed": 1.0,
+            "op_summary": true,
+            "unit": "ppm"
+        },
+        "TRG - Kiln BZT Max": {
+            "default_max": 1450,
+            "default_min": 1200,
+            "description": "AI Target: Kiln Burning Zone Max T",
+            "formula": "max(`Kiln BZT1`, `Kiln BZT2`)",
+            "friendly_name": "TRG - Kiln BZT Max",
+            "is_setpoint": true,
+            "nudge_speed": 1.0,
+            "op_summary": true,
+            "unit": "°C"
+        },
+        "TRG - Kiln Motor Amps": {
+            "default_max": 400,
+            "default_min": 200,
+            "description": "AI Target: Kiln Motor Current",
+            "formula": "`Kiln motor 1 Amps`",
+            "friendly_name": "TRG - Kiln Motor Amps",
+            "is_setpoint": true,
+            "nudge_speed": 1.0,
+            "op_summary": true,
+            "unit": "A"
+        },
+        "TRG - Cooler Sec Air T": {
+            "default_max": 1200,
+            "default_min": 600,
+            "description": "AI Target: Cooler Secondary Air T",
+            "formula": "max(`Secondary air T1`, `Secondary air T2`)",
+            "friendly_name": "TRG - Cooler Sec Air T",
+            "is_setpoint": true,
+            "nudge_speed": 1.0,
+            "op_summary": true,
+            "unit": "°C"
         }
     },
     "control_variables": {
