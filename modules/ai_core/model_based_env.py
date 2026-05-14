@@ -66,7 +66,11 @@ class PessimisticVirtualEnv:
         norm_a = norm(raw_a, 'action')
 
         self.current_obs = np.concatenate([norm_s, norm_a], axis=1).flatten()
-        self.last_norm_s = norm_s[-1]
+        
+        # --- STABILITY FIX: Sanitize initial state and observation ---
+        self.current_obs = np.nan_to_num(self.current_obs, nan=0.0)
+        self.last_norm_s = np.nan_to_num(norm_s[-1], nan=0.0)
+        
         self.steps = 0
         return self.current_obs
 
@@ -83,39 +87,52 @@ class PessimisticVirtualEnv:
 
         delta = mean_delta.cpu().numpy()[0]
         next_norm_s = self.last_norm_s + delta
+        
+        # --- STABILITY FIX: Sanitize and clip the dream state ---
+        next_norm_s = np.nan_to_num(next_norm_s, nan=0.0)
+        next_norm_s = np.clip(next_norm_s, -5.0, 5.0)
 
-        # 2. CALCULATE REWARD
         def denorm(val, idx, vtype='state'):
             mn = self.stats[vtype]['min'][idx]
             rng = self.stats[vtype]['range'][idx]
             return (val * rng) + mn
 
         reward = 0.0
-
-        # A. Target Deviation Penalty (REFACTORED)
         try:
+            # A. Target Deviation Penalty
             t_idx = self.s_cols.index(self.target_var)
             pred_val = denorm(next_norm_s[t_idx], t_idx)
+            
+            # Use safe subtraction
+            diff = abs(float(pred_val) - float(self.target_setpoint))
+            r_penalty = diff * self.deviation_penalty
+            reward -= min(r_penalty, 500.0) 
 
-            # Use loaded target setpoint and penalty weight
-            reward -= abs(pred_val - self.target_setpoint) * self.deviation_penalty
-        except:
-            pass
-
-        # B. Action Penalties
-        for i, tag in enumerate(self.a_cols):
-            if tag in self.weights:
-                w = self.weights[tag]
-                action_val = action[i]
-                reward += action_val * w
+            # B. Action Penalties
+            for i, tag in enumerate(self.a_cols):
+                if tag in self.weights:
+                    w = self.weights[tag]
+                    action_val = float(action[i])
+                    reward += action_val * w
+            
+            # --- FINAL REWARD SANITY CHECK ---
+            if np.isnan(reward) or np.isinf(reward):
+                print(f"⚠️ Warning: NaN/Inf detected in Reward. Setpoint: {pred_val}")
+                reward = -10.0
+        except Exception as e:
+            print(f"⚠️ Reward Error: {e}")
+            reward = -10.0
 
         # 3. UPDATE OBSERVATION
-        step_len = len(self.last_norm_s) + len(action)
-        new_obs = self.current_obs[step_len:]
-        new_obs = np.concatenate([new_obs, next_norm_s, action])
-
-        self.current_obs = new_obs
+        # [s0, a0, s1, a1, ...]
+        new_step = np.concatenate([next_norm_s, action])
+        self.current_obs = np.concatenate([self.current_obs[self.s_dim + self.a_dim:], new_step])
         self.last_norm_s = next_norm_s
+        self.steps += 1
         done = self.steps >= self.max_steps
 
-        return self.current_obs, reward, done, {}
+        # --- SAFETY SHIELD: Final sanitization of all environment outputs ---
+        obs = np.nan_to_num(self.current_obs)
+        reward = float(np.nan_to_num(reward))
+        
+        return obs, reward, done, {}

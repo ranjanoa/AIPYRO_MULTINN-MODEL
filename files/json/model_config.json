@@ -1742,17 +1742,17 @@
         "primary_tag": "Kiln motor 1 Amps"
     },
     "optimization_settings": {
-        "target_setpoint": 1350,
+        "target_setpoint": 1360,
         "target_variable": "Kiln BZT1",
         "weights": {
             "ID fan speed": -0.02,
             "Kiln feed": 0.06,
             "Petcoke (Kiln)": -0.06,
             "Petcoke (PC)": -0.04,
-            "RDF (Kiln)": 0.1,
-            "RDF 1 (PC)": 0.1,
-            "RDF 2 (PC)": 0.1,
-            "RIP (Kiln)": 0.08
+            "RDF (Kiln)": 0.12,
+            "RDF 1 (PC)": 0.12,
+            "RDF 2 (PC)": 0.12,
+            "RIP (Kiln)": 0.15
         }
     },
     "pirl_mpc_config": {
@@ -1973,7 +1973,7 @@
                 },
                 "Kiln motor 1 Amps": {
                     "max": 320,
-                    "min": 260
+                    "min": 230
                 },
                 "SHC": {
                     "max": 870

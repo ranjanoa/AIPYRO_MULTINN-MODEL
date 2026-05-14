@@ -92,16 +92,28 @@ class PolicyNetwork(nn.Module):
 
     def sample(self, state):
         mean, log_std = self.forward(state)
+        
+        # --- STABILITY FIX: Ensure mean and std are finite ---
+        if torch.isnan(mean).any() or torch.isinf(mean).any():
+            mean = torch.nan_to_num(mean, 0.0)
+        if torch.isnan(log_std).any() or torch.isinf(log_std).any():
+            log_std = torch.nan_to_num(log_std, 0.0)
+
         std = log_std.exp()
         normal = torch.distributions.Normal(mean, std)
         x_t = normal.rsample()
         y_t = torch.tanh(x_t)
         action = y_t
+        
+        # Log Probability calculation with epsilon for numerical stability
         log_prob = normal.log_prob(x_t)
-
-        # Enforcing Action Bound
         log_prob -= torch.log(1 - y_t.pow(2) + epsilon)
         log_prob = log_prob.sum(1, keepdim=True)
+        
+        # Final safety check on outputs
+        if torch.isnan(log_prob).any():
+            log_prob = torch.nan_to_num(log_prob, -1.0)
+            
         return action, log_prob, mean
 
 
@@ -109,7 +121,7 @@ class PolicyNetwork(nn.Module):
 # 3. SAC AGENT (The Brain)
 # ==============================================================================
 class SACAgent:
-    def __init__(self, num_inputs, action_space, hidden_size=256, lr=0.0003, gamma=0.99, tau=0.005, alpha=0.2):
+    def __init__(self, num_inputs, action_space, hidden_size=256, lr=0.0001, gamma=0.99, tau=0.005, alpha=0.2):
         self.gamma = gamma
         self.tau = tau
         self.alpha = alpha
@@ -156,12 +168,15 @@ class SACAgent:
 
         self.critic_optim.zero_grad()
         qf1_loss.backward()
-        torch.nn.utils.clip_grad_norm_(self.critic.parameters(), 1.0)
+        # --- STABILITY FIX: Dual Clipping ---
+        torch.nn.utils.clip_grad_value_(self.critic.parameters(), 1.0)
+        torch.nn.utils.clip_grad_norm_(self.critic.parameters(), 0.5)
         self.critic_optim.step()
 
         self.critic2_optim.zero_grad()
         qf2_loss.backward()
-        torch.nn.utils.clip_grad_norm_(self.critic2.parameters(), 1.0)
+        torch.nn.utils.clip_grad_value_(self.critic2.parameters(), 1.0)
+        torch.nn.utils.clip_grad_norm_(self.critic2.parameters(), 0.5)
         self.critic2_optim.step()
 
         pi, log_pi, _ = self.policy.sample(state_batch)
@@ -173,19 +188,32 @@ class SACAgent:
 
         self.policy_optim.zero_grad()
         policy_loss.backward()
-        torch.nn.utils.clip_grad_norm_(self.policy.parameters(), 1.0)
+        torch.nn.utils.clip_grad_value_(self.policy.parameters(), 1.0)
+        torch.nn.utils.clip_grad_norm_(self.policy.parameters(), 0.5)
         self.policy_optim.step()
 
         # Soft Updates
-        for target_param, param in zip(self.critic_target.parameters(), self.critic.parameters()):
-            target_param.data.copy_(target_param.data * (1.0 - self.tau) + param.data * self.tau)
+        with torch.no_grad():
+            for target_param, param in zip(self.critic_target.parameters(), self.critic.parameters()):
+                target_param.data.copy_(target_param.data * (1.0 - self.tau) + param.data * self.tau)
 
-        for target_param, param in zip(self.critic2_target.parameters(), self.critic2.parameters()):
-            target_param.data.copy_(target_param.data * (1.0 - self.tau) + param.data * self.tau)
+            for target_param, param in zip(self.critic2_target.parameters(), self.critic2.parameters()):
+                target_param.data.copy_(target_param.data * (1.0 - self.tau) + param.data * self.tau)
 
         return qf1_loss.item(), policy_loss.item()
 
     def save(self, path):
+        # --- SAFETY FIX: Check for NaNs before saving ---
+        has_nan = False
+        for param in self.policy.parameters():
+            if torch.isnan(param).any() or torch.isinf(param).any():
+                has_nan = True
+                break
+        
+        if has_nan:
+            print(f"⚠️ [FATAL] Attempted to save NaN-corrupted weights to {path}. Aborting save to protect last healthy checkpoint.")
+            return
+
         # Save as dictionary to handle multiple networks
         state = {
             'policy': self.policy.state_dict(),
@@ -193,6 +221,11 @@ class SACAgent:
             'critic2': self.critic2.state_dict()
         }
         torch.save(state, path + ".pth")
+        
+        # Save a timestamped backup for versioning
+        import time
+        backup_path = f"{path}_{int(time.time())}.pth"
+        # torch.save(state, backup_path) # Optional: enable if disk space allows
 
     def load(self, path):
         checkpoint = torch.load(path + ".pth", map_location=device)

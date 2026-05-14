@@ -622,13 +622,23 @@ def train_world_model(df, epochs=10, batch_size=256):
         avg_loss = epoch_loss / max(1, batch_count)
         if epoch % 5 == 0:
             print(f"       Epoch {epoch}: Loss = {avg_loss:.6f}")
+        
+        # --- NEW: Intermediate Checkpoint for diagnostics ---
+        if (epoch + 1) % 10 == 0:
+            _world_model.save(WM_PATH)
+            print(f"       [CHECKPOINT] World Model saved at Epoch {epoch+1}")
 
     _world_model.save(WM_PATH)
     print("   ✅ World Model Trained & Saved.")
 
 
-def train_sac_agent(df, steps=2000):
+def train_sac_agent(df, steps=50000):
     print(f"   >>> Training SAC Agent ({steps} steps)...")
+    
+    # Ensure system is initialized (loads existing weights if any)
+    if _sac_agent is None or _world_model is None:
+        _initialize_system()
+
     if len(df) > 100000:
         print("       Truncating dataset for SAC Env initialization (Last 100k rows)")
         df_subset = df.iloc[-100000:].reset_index(drop=True)
@@ -643,32 +653,50 @@ def train_sac_agent(df, steps=2000):
     env = PessimisticVirtualEnv(_world_model, df_subset, env_params, HISTORY_WINDOW)
     s_dim = _world_model.input_dim
     a_dim = len(_env_config['a_cols'])
-    buffer = ReplayBuffer(capacity=10000, state_dim=s_dim, action_dim=a_dim)
+    
+    # Replay Buffer
+    s_dim_obs = (len(_env_config['s_cols']) + len(_env_config['a_cols'])) * HISTORY_WINDOW
+    buffer = ReplayBuffer(capacity=100000, state_dim=s_dim_obs, action_dim=a_dim)
 
-    print("       Collecting initial experience...")
+    print("       Collecting initial experience (1,000 random steps)...")
     state = env.reset()
-    for _ in range(500):
+    for _ in range(1000):
         action = env.sample_random_action()
         next_state, reward, done, _ = env.step(action)
         buffer.push(state, action, reward, next_state, done)
         state = next_state if not done else env.reset()
 
-    print("       Optimizing Policy...")
+    print(f"       Optimizing Policy (Starting from {'existing weights' if os.path.exists(SAC_PATH + '.pth') else 'scratch'})...")
+    total_reward = 0.0
     state = env.reset()
-    for i in range(steps):
+    for i in range(1, steps + 1):
+        state = np.nan_to_num(state)
         action_norm = _sac_agent.select_action(state, evaluate=False)
         next_state, reward, done, _ = env.step(action_norm)
+        
+        # --- SAFETY: Sanitize all signals ---
+        reward = np.nan_to_num(reward)
+        next_state = np.nan_to_num(next_state)
+        
         buffer.push(state, action_norm, reward, next_state, done)
 
         if buffer.size > 256:
-            _sac_agent.update_parameters(buffer, batch_size=64)
+            _sac_agent.update_parameters(buffer, batch_size=128)
 
         state = next_state if not done else env.reset()
+        total_reward += reward
+        
         if i % 500 == 0:
-            print(f"       Step {i}: Avg Reward = {reward:.4f}")
+            avg_r = total_reward / 500
+            print(f"       Step {i}/{steps}: Avg Reward = {avg_r:.4f}")
+            total_reward = 0.0
+            
+        if i % 5000 == 0:
+            print(f"       [CHECKPOINT] Saving SAC Agent at step {i}...")
+            _sac_agent.save(SAC_PATH)
 
     _sac_agent.save(SAC_PATH)
-    print("   ✅ SAC Agent Trained & Saved.")
+    print("   ✅ SAC Agent Training Complete & Saved.")
 
 
 def train_system_offline():

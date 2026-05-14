@@ -2518,3 +2518,24 @@ Rejected at tag: RDF 1 (PC)
 Current RT value: 2.0000
 Target range: [1.5000 to 2.5001]
 Config Limits: [0.0 to 10.0]
+
+--- 2026-05-14T12:40:59.999322 ---
+Phase: Standard
+Rejected at tag: RDF 1 (PC)
+Current RT value: 0.8307
+Target range: [0.6230 to 1.0383]
+Config Limits: [0.0 to 10.0]
+
+--- 2026-05-14T12:41:39.636673 ---
+Phase: Standard
+Rejected at tag: RDF 1 (PC)
+Current RT value: 0.0247
+Target range: [0.0185 to 0.0309]
+Config Limits: [0.0 to 10.0]
+
+--- 2026-05-14T12:41:39.649295 ---
+Phase: Steering (Relaxed)
+Rejected at tag: RDF 2 (PC)
+Current RT value: 9.8961
+Target range: [0.0000 to 10.0000]
+Config Limits: [0.0 to 10.0]

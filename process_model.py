@@ -296,9 +296,12 @@ def materialize_df(df, controls_cfg, indicators_cfg, calc_vars_cfg):
         if not formula or not friendly_name: continue
         try:
             processed_formula = preprocess_formula(formula, sorted_vars)
-            enriched_df[friendly_name] = enriched_df.eval(processed_formula)
+            enriched_df[friendly_name] = enriched_df.eval(processed_formula).fillna(0.0)
         except Exception:
-            if friendly_name not in enriched_df.columns: enriched_df[friendly_name] = 0.0
+            if friendly_name not in enriched_df.columns: 
+                enriched_df[friendly_name] = 0.0
+            else:
+                enriched_df[friendly_name] = enriched_df[friendly_name].fillna(0.0)
     return enriched_df
 
 def generate_calculated_actions(raw_actions, state_map, controls_cfg, indicators_cfg, calc_vars_cfg):
