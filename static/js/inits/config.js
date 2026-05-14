@@ -1,5 +1,6 @@
 export const MOCK_CONFIG = Object.freeze({
-    API_URL: '',
+    // VERSION: 2026-05-14_23:54
+    API_URL: window.location.origin,
 
     config: {
         "model_name": "NEXUS-V4 Simulator",
@@ -7,3 +8,5 @@ export const MOCK_CONFIG = Object.freeze({
         "indicator_variables": {"sinteringZoneTemp": {"unit": "C"}}
     }
 });
+
+console.log("[AI-CONFIG] Active API URL:", MOCK_CONFIG.API_URL);
