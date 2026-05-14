@@ -256,7 +256,9 @@ def preprocess_formula(formula, sorted_variable_names):
     for v in sorted_variable_names:
         # Wrap if name contains spaces or common math operators that would break eval()
         if any(c in v for c in ' /-()+*%'):
-            pattern = r'(?<!`)\b' + re.escape(v) + r'\b(?!`)'
+            # Use a more robust pattern that handles non-word characters like ()
+            # It looks for the variable name NOT preceded or followed by a backtick
+            pattern = r'(?<![`\w])' + re.escape(v) + r'(?![`\w])'
             processed = re.sub(pattern, f"`{v}`", processed)
     return processed
 
