@@ -326,7 +326,16 @@ def generate_calculated_actions(raw_actions, state_map, controls_cfg, indicators
     # If we have a recommendation, we use its 'predicted_state' (for NN) 
     # or 'match_meta' (for Fingerprint) to ground our 'Target' calculations.
     if recommendation:
-        # Use NN Predicted State if available
+        # Use NN Predicted State (Rollouts) if available
+        # The NN returns rollouts in 'fingerprint_prediction' as a list of points.
+        # We take the last point (index 29) as the 30-minute 'Target'.
+        ai_rollouts = recommendation.get('fingerprint_prediction')
+        if ai_rollouts and isinstance(ai_rollouts, dict):
+            for var_name, rollout in ai_rollouts.items():
+                if isinstance(rollout, list) and len(rollout) > 0:
+                    target_context[var_name] = rollout[-1]
+        
+        # Use NN direct predicted state if available
         pred_state = recommendation.get('predicted_state')
         if pred_state:
             target_context.update(pred_state)
