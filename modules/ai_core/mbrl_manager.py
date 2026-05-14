@@ -147,11 +147,24 @@ def _initialize_system():
             'state': {'min': s_min, 'max': s_max, 'range': s_range},
             'action': {'min': a_min, 'max': a_max, 'range': a_range}
         }
-        _env_config = {'stats': stats, 's_cols': s_cols, 'a_cols': a_cols}
-        print("✅ Config & Data Loaded Successfully.")
+
+        # --- NEW: Store absolute industrial limits for rollout clamping ---
+        all_cfg = {**process_model.get_control_variables(), **process_model.get_indicator_variables()}
+        s_limits_min = np.array([float(all_cfg.get(c, {}).get('default_min', -1e9)) for c in s_cols])
+        s_limits_max = np.array([float(all_cfg.get(c, {}).get('default_max', 1e9)) for c in s_cols])
+        
+        _env_config = {
+            'stats': stats, 
+            's_cols': s_cols, 
+            'a_cols': a_cols,
+            's_limits': {'min': s_limits_min, 'max': s_limits_max}
+        }
+        print("✅ Config & Data Loaded Successfully (with Industrial Clamping).")
 
     except Exception as e:
         print(f"❌ Critical Error in Initialization: {e}")
+        import traceback
+        traceback.print_exc()
         return
 
     s_dim = len(s_cols)
@@ -259,14 +272,20 @@ def predict_soft_sensor_rollout(current_real_df, pred_var_name, steps=60):
         delta = mean_delta.cpu().numpy()[0]
         next_norm_state = current_norm_state + delta
 
+        # --- INDUSTRIAL CLAMPING (Rollout Stabilization) ---
+        # We denormalize, clamp to physical limits, then re-normalize.
+        # This prevents the 'runaway' explosion where Amps shoot to 7000.
+        s_stats = _env_config['stats']['state']
+        val_real_all = (next_norm_state * s_stats['range']) + s_stats['min']
+        val_real_all = np.clip(val_real_all, _env_config['s_limits']['min'], _env_config['s_limits']['max'])
+        next_norm_state = (val_real_all - s_stats['min']) / s_stats['range']
+
         # Early-exit guard: if the state has exploded (NaN/Inf from a bad NN cycle),
         # stop the rollout immediately to prevent blocking the background thread.
         if not np.isfinite(next_norm_state).all():
             break
 
-        val_norm = next_norm_state[target_idx]
-        val_real = (val_norm * _env_config['stats']['state']['range'][target_idx]) + \
-                   _env_config['stats']['state']['min'][target_idx]
+        val_real = val_real_all[target_idx]
 
         # Ensure we don't append NaNs into the JSON payload
         if np.isnan(val_real) or np.isinf(val_real):
@@ -344,9 +363,13 @@ def simulate_what_if(history_df, manual_controls, target_var, steps=60):
             delta = mean_delta.cpu().numpy()[0]
             next_norm_state = current_norm_state + delta
 
-            val_norm = next_norm_state[target_idx]
-            val_real = (val_norm * _env_config['stats']['state']['range'][target_idx]) + \
-                       _env_config['stats']['state']['min'][target_idx]
+            # --- INDUSTRIAL CLAMPING (Sim Stabilization) ---
+            s_stats = _env_config['stats']['state']
+            val_real_all = (next_norm_state * s_stats['range']) + s_stats['min']
+            val_real_all = np.clip(val_real_all, _env_config['s_limits']['min'], _env_config['s_limits']['max'])
+            next_norm_state = (val_real_all - s_stats['min']) / s_stats['range']
+
+            val_real = val_real_all[target_idx]
 
             # Ensure we don't append NaNs into the JSON payload
             if np.isnan(val_real) or np.isinf(val_real):
@@ -592,8 +615,8 @@ def get_optimal_action(current_real_df):
 # ==============================================================================
 # 6. OFFLINE TRAINING LOGIC
 # ==============================================================================
-def train_world_model(df, epochs=10, batch_size=256):
-    print(f"   >>> Training World Model ({epochs} epochs)...")
+def train_world_model(df, epochs=50, batch_size=256):
+    print(f"   >>> Training World Model ({epochs} epochs)...", flush=True)
     s_cols = _env_config['s_cols']
     a_cols = _env_config['a_cols']
 
@@ -617,22 +640,22 @@ def train_world_model(df, epochs=10, batch_size=256):
             epoch_loss += loss
             batch_count += 1
             if batch_count % 5000 == 0:
-                print(f"       [Epoch {epoch}] Batch {batch_count} - Current Loss: {loss:.6f}")
+                print(f"       [Epoch {epoch}] Batch {batch_count} - Current Loss: {loss:.6f}", flush=True)
 
         avg_loss = epoch_loss / max(1, batch_count)
         if epoch % 5 == 0:
-            print(f"       Epoch {epoch}: Loss = {avg_loss:.6f}")
+            print(f"       Epoch {epoch}: Loss = {avg_loss:.6f}", flush=True)
         
         # --- NEW: Intermediate Checkpoint for diagnostics ---
         if (epoch + 1) % 10 == 0:
             _world_model.save(WM_PATH)
-            print(f"       [CHECKPOINT] World Model saved at Epoch {epoch+1}")
+            print(f"       [CHECKPOINT] World Model saved at Epoch {epoch+1}", flush=True)
 
     _world_model.save(WM_PATH)
     print("   ✅ World Model Trained & Saved.")
 
 
-def train_sac_agent(df, steps=50000):
+def train_sac_agent(df, steps=100000):
     print(f"   >>> Training SAC Agent ({steps} steps)...")
     
     # Ensure system is initialized (loads existing weights if any)
@@ -688,11 +711,11 @@ def train_sac_agent(df, steps=50000):
         
         if i % 500 == 0:
             avg_r = total_reward / 500
-            print(f"       Step {i}/{steps}: Avg Reward = {avg_r:.4f}")
+            print(f"       Step {i}/{steps}: Avg Reward = {avg_r:.4f}", flush=True)
             total_reward = 0.0
             
         if i % 5000 == 0:
-            print(f"       [CHECKPOINT] Saving SAC Agent at step {i}...")
+            print(f"       [CHECKPOINT] Saving SAC Agent at step {i}...", flush=True)
             _sac_agent.save(SAC_PATH)
 
     _sac_agent.save(SAC_PATH)
@@ -700,6 +723,16 @@ def train_sac_agent(df, steps=50000):
 
 
 def train_system_offline():
+    # --- CPU RESOURCE LIMITING: 80% MAX ---
+    import multiprocessing
+    try:
+        num_cores = multiprocessing.cpu_count()
+        target_threads = max(1, int(num_cores * 0.8))
+        torch.set_num_threads(target_threads)
+        print(f"🛠️ CPU Limit Applied: Using {target_threads} threads out of {num_cores} (80% Cap).", flush=True)
+    except Exception as cpu_err:
+        print(f"⚠️ Warning: Could not set CPU affinity/threads: {cpu_err}")
+
     _initialize_system()
     if _world_model is None:
         print("❌ Cannot train: System failed to initialize.")
@@ -807,10 +840,10 @@ def train_system_offline():
     print("=" * 50 + "\n")
 
     # 1. TRAIN WORLD MODEL
-    train_world_model(df, epochs=10)
+    train_world_model(df)
 
     # 2. TRAIN SAC AGENT
     if SAC_AVAILABLE:
-        train_sac_agent(df, steps=50000)
+        train_sac_agent(df)
     else:
         print("⚠️ SAC Agent module missing. Skipping policy training.")

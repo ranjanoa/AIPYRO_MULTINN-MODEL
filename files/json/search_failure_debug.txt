@@ -2539,3 +2539,115 @@ Rejected at tag: RDF 2 (PC)
 Current RT value: 9.8961
 Target range: [0.0000 to 10.0000]
 Config Limits: [0.0 to 10.0]
+
+--- 2026-05-14T13:04:12.382439 ---
+Phase: Standard
+Rejected at tag: Quench fan speed
+Current RT value: 399.6773
+Target range: [299.7580 to 499.5966]
+Config Limits: [0.0 to 810.6]
+
+--- 2026-05-14T13:04:50.777599 ---
+Phase: Standard
+Rejected at tag: Quench fan gas flow
+Current RT value: 546.3119
+Target range: [409.7340 to 682.8899]
+Config Limits: [0.0 to 914.9]
+
+--- 2026-05-14T13:05:29.196155 ---
+Phase: Standard
+Rejected at tag: Dividing gate
+Current RT value: 30.6668
+Target range: [23.0001 to 38.3335]
+Config Limits: [0.0 to 60.0]
+
+--- 2026-05-14T13:06:01.445611 ---
+Phase: Standard
+Rejected at tag: Dividing gate
+Current RT value: 30.6236
+Target range: [22.9677 to 38.2795]
+Config Limits: [0.0 to 60.0]
+
+--- 2026-05-14T13:07:39.300145 ---
+Phase: Standard
+Rejected at tag: Dividing gate
+Current RT value: 30.6208
+Target range: [22.9656 to 38.2760]
+Config Limits: [0.0 to 60.0]
+
+--- 2026-05-14T13:08:16.831829 ---
+Phase: Standard
+Rejected at tag: Dividing gate
+Current RT value: 30.6208
+Target range: [22.9656 to 38.2760]
+Config Limits: [0.0 to 60.0]
+
+--- 2026-05-14T13:08:50.894408 ---
+Phase: Standard
+Rejected at tag: Dividing gate
+Current RT value: 31.6045
+Target range: [23.7034 to 39.5057]
+Config Limits: [0.0 to 60.0]
+
+--- 2026-05-14T13:12:53.668146 ---
+Phase: Standard
+Rejected at tag: Dividing gate
+Current RT value: 29.9625
+Target range: [22.4719 to 37.4531]
+Config Limits: [0.0 to 60.0]
+
+--- 2026-05-14T13:18:37.328916 ---
+Phase: Standard
+Rejected at tag: Dividing gate
+Current RT value: 29.2417
+Target range: [21.9313 to 36.5521]
+Config Limits: [0.0 to 60.0]
+
+--- 2026-05-14T13:22:00.252504 ---
+Phase: Standard
+Rejected at tag: Dividing gate
+Current RT value: 29.2458
+Target range: [21.9344 to 36.5573]
+Config Limits: [0.0 to 60.0]
+
+--- 2026-05-14T13:25:47.879559 ---
+Phase: Standard
+Rejected at tag: Dividing gate
+Current RT value: 29.2458
+Target range: [21.9344 to 36.5573]
+Config Limits: [0.0 to 60.0]
+
+--- 2026-05-14T13:25:49.749992 ---
+Phase: Standard
+Rejected at tag: Dividing gate
+Current RT value: 29.2458
+Target range: [21.9344 to 36.5573]
+Config Limits: [0.0 to 60.0]
+
+--- 2026-05-14T13:30:41.568297 ---
+Phase: Standard
+Rejected at tag: Cooler BF fan motor speed
+Current RT value: 630.7349
+Target range: [473.0512 to 788.4187]
+Config Limits: [0.0 to 1500.0]
+
+--- 2026-05-14T13:31:16.821447 ---
+Phase: Standard
+Rejected at tag: Cooler BF fan motor speed
+Current RT value: 601.3107
+Target range: [450.9830 to 751.6384]
+Config Limits: [0.0 to 1500.0]
+
+--- 2026-05-14T13:31:45.957829 ---
+Phase: Standard
+Rejected at tag: Cooler BF fan motor speed
+Current RT value: 629.9379
+Target range: [472.4534 to 787.4224]
+Config Limits: [0.0 to 1500.0]
+
+--- 2026-05-14T13:37:45.441067 ---
+Phase: Standard
+Rejected at tag: Cooler BF fan motor speed
+Current RT value: 593.4651
+Target range: [445.0988 to 741.8314]
+Config Limits: [0.0 to 1500.0]
